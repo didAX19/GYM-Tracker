@@ -1,0 +1,113 @@
+import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import React from 'react';
+import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+
+import { Card } from '@/components/Card';
+import { EmptyState } from '@/components/EmptyState';
+import { useHistoryStore } from '@/store/useHistoryStore';
+import { useProgramStore } from '@/store/useProgramStore';
+import { spacing } from '@/theme/spacing';
+import { typography } from '@/theme/typography';
+import { useTheme } from '@/theme/useTheme';
+import { formatWeight } from '@/utils/calc';
+import { formatFriendly, todayISO } from '@/utils/date';
+
+export default function WorkoutHistoryScreen() {
+  const { colors } = useTheme();
+  const history = useHistoryStore((s) => s.history);
+  const removeWorkout = useHistoryStore((s) => s.removeWorkout);
+  const days = useProgramStore((s) => s.days);
+
+  const confirmDelete = (id: string, name: string) => {
+    Alert.alert('Delete Workout', `Remove "${name}" from your history? This cannot be undone.`, [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Delete', style: 'destructive', onPress: () => removeWorkout(id) },
+    ]);
+  };
+
+  return (
+    <View style={[styles.safe, { backgroundColor: colors.background }]}>
+      {history.length === 0 ? (
+        <EmptyState
+          icon="📋"
+          title="No workouts yet"
+          message="Completed workouts will appear here with all your logged weights."
+        />
+      ) : (
+        <FlatList
+          data={history}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.list}
+          renderItem={({ item }) => {
+            const day = days.find((d) => d.id === item.workoutDayId);
+            const name = day?.name ?? 'Workout';
+            const loggedSets = item.entries.reduce(
+              (sum, e) => sum + e.weightsKg.filter((w) => w != null && w > 0).length,
+              0
+            );
+            const topWeight = Math.max(
+              0,
+              ...item.entries.flatMap((e) =>
+                e.weightsKg.filter((w): w is number => w != null && w > 0)
+              )
+            );
+            const isToday = item.date === todayISO();
+
+            return (
+              <Pressable
+                onPress={() =>
+                  router.push({ pathname: '/history/[entryId]', params: { entryId: item.id } })
+                }
+              >
+                <Card style={styles.row}>
+                  <Text style={{ fontSize: 24 }}>💪</Text>
+                  <View style={styles.rowText}>
+                    <View style={styles.titleRow}>
+                      <Text style={[typography.headline, { color: colors.text }]}>{name}</Text>
+                      {isToday && (
+                        <View style={[styles.todayBadge, { backgroundColor: colors.accentSoft }]}>
+                          <Text style={[typography.caption, { color: colors.accent, fontWeight: '700' }]}>
+                            Today
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                    <Text style={[typography.caption, { color: colors.textSecondary }]}>
+                      {formatFriendly(item.date)} · {item.entries.length} exercise
+                      {item.entries.length === 1 ? '' : 's'} · {loggedSets} set
+                      {loggedSets === 1 ? '' : 's'} logged
+                      {topWeight > 0 ? ` · top ${formatWeight(topWeight)}` : ''}
+                    </Text>
+                  </View>
+                  <Pressable
+                    hitSlop={8}
+                    onPress={() => confirmDelete(item.id, name)}
+                    style={styles.deleteBtn}
+                  >
+                    <Ionicons name="trash-outline" size={20} color={colors.danger} />
+                  </Pressable>
+                  <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
+                </Card>
+              </Pressable>
+            );
+          }}
+        />
+      )}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  safe: { flex: 1 },
+  list: { padding: spacing.lg, gap: spacing.md },
+  row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  rowText: { flex: 1 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  todayBadge: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: 999,
+  },
+  deleteBtn: { padding: spacing.xs },
+});
