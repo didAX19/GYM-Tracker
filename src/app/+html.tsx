@@ -69,6 +69,13 @@ input, textarea {
   -webkit-user-select: text;
   user-select: text;
 }
+/* Drop the default browser focus ring; inputs show their own focus styling. */
+input:focus,
+input:focus-visible,
+textarea:focus,
+textarea:focus-visible {
+  outline: none;
+}
 /* Center the app in a phone-sized frame on large (desktop) screens. */
 #root {
   max-width: 600px;

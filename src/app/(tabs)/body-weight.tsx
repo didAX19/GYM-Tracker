@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/Button';
+import { CalendarPicker } from '@/components/CalendarPicker';
 import { Card } from '@/components/Card';
 import { EmptyState } from '@/components/EmptyState';
 import { SegmentedControl } from '@/components/SegmentedControl';
@@ -38,6 +39,8 @@ export default function BodyWeightScreen() {
   const [adding, setAdding] = useState(false);
   const [weightInput, setWeightInput] = useState('');
   const [dateInput, setDateInput] = useState(todayISO());
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [weightFocused, setWeightFocused] = useState(false);
 
   const sorted = useMemo(() => sortByDateDesc(entries), [entries]);
   const current = sorted[0];
@@ -185,7 +188,7 @@ export default function BodyWeightScreen() {
                 styles.weightField,
                 {
                   backgroundColor: colors.inputBackground,
-                  borderColor: colors.border,
+                  borderColor: weightFocused ? colors.accent : colors.border,
                 },
               ]}
             >
@@ -196,6 +199,8 @@ export default function BodyWeightScreen() {
                 placeholder="0.0"
                 placeholderTextColor={colors.textTertiary}
                 autoFocus
+                onFocus={() => setWeightFocused(true)}
+                onBlur={() => setWeightFocused(false)}
                 style={[styles.weightInput, { color: colors.text }]}
               />
               <Text style={[typography.title, styles.weightUnit, { color: colors.textSecondary }]}>
@@ -207,9 +212,15 @@ export default function BodyWeightScreen() {
               <Pressable onPress={() => shiftDate(-1)} hitSlop={8}>
                 <Ionicons name="chevron-back-circle" size={28} color={colors.accent} />
               </Pressable>
-              <Text style={[typography.headline, { color: colors.text }]}>
-                {dateInput === todayISO() ? 'Today' : formatFriendly(dateInput)}
-              </Text>
+              <Pressable
+                style={[styles.datePickerBtn, { backgroundColor: colors.inputBackground }]}
+                onPress={() => setCalendarOpen(true)}
+              >
+                <Ionicons name="calendar-outline" size={18} color={colors.accent} />
+                <Text style={[typography.headline, { color: colors.text }]}>
+                  {dateInput === todayISO() ? 'Today' : formatFriendly(dateInput)}
+                </Text>
+              </Pressable>
               <Pressable onPress={() => shiftDate(1)} hitSlop={8}>
                 <Ionicons
                   name="chevron-forward-circle"
@@ -236,6 +247,14 @@ export default function BodyWeightScreen() {
           </View>
         </View>
       </Modal>
+
+      <CalendarPicker
+        visible={calendarOpen}
+        value={dateInput}
+        onSelect={setDateInput}
+        onClose={() => setCalendarOpen(false)}
+        maxDate={new Date()}
+      />
     </SafeAreaView>
   );
 }
@@ -299,6 +318,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  datePickerBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.pill,
   },
   promptButtons: { flexDirection: 'row', gap: spacing.md },
   promptButton: { flex: 1 },
