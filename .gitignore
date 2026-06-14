@@ -51,3 +51,7 @@ app-example
 Thumbs.db
 Desktop.ini
 ehthumbs.db
+
+# Editor / local developer notes (not for public repo)
+.vscode/
+README.private.md
