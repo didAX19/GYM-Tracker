@@ -17,7 +17,7 @@ A personal gym program tracker built with Expo and TypeScript. Track workouts, b
 **Requirements:** Node.js 18+
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/GYM-Tracker.git
+git clone https://github.com/didAX19/GYM-Tracker.git
 cd GYM-Tracker
 npm install
 npx expo start --web
