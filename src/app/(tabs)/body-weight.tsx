@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/Button';
+import { CalendarPicker } from '@/components/CalendarPicker';
 import { Card } from '@/components/Card';
 import { EmptyState } from '@/components/EmptyState';
 import { SegmentedControl } from '@/components/SegmentedControl';
@@ -38,6 +39,8 @@ export default function BodyWeightScreen() {
   const [adding, setAdding] = useState(false);
   const [weightInput, setWeightInput] = useState('');
   const [dateInput, setDateInput] = useState(todayISO());
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [weightFocused, setWeightFocused] = useState(false);
 
   const sorted = useMemo(() => sortByDateDesc(entries), [entries]);
   const current = sorted[0];
@@ -180,7 +183,15 @@ export default function BodyWeightScreen() {
           <View style={[styles.promptCard, { backgroundColor: colors.cardElevated }]}>
             <Text style={[typography.title, { color: colors.text }]}>Log Body Weight</Text>
 
-            <View style={styles.weightInputRow}>
+            <View
+              style={[
+                styles.weightField,
+                {
+                  backgroundColor: colors.inputBackground,
+                  borderColor: weightFocused ? colors.accent : colors.border,
+                },
+              ]}
+            >
               <TextInput
                 value={weightInput}
                 onChangeText={setWeightInput}
@@ -188,25 +199,28 @@ export default function BodyWeightScreen() {
                 placeholder="0.0"
                 placeholderTextColor={colors.textTertiary}
                 autoFocus
-                style={[
-                  styles.weightInput,
-                  {
-                    backgroundColor: colors.inputBackground,
-                    color: colors.text,
-                    borderColor: colors.border,
-                  },
-                ]}
+                onFocus={() => setWeightFocused(true)}
+                onBlur={() => setWeightFocused(false)}
+                style={[styles.weightInput, { color: colors.text }]}
               />
-              <Text style={[typography.title, { color: colors.textSecondary }]}>kg</Text>
+              <Text style={[typography.title, styles.weightUnit, { color: colors.textSecondary }]}>
+                kg
+              </Text>
             </View>
 
             <View style={styles.dateRow}>
               <Pressable onPress={() => shiftDate(-1)} hitSlop={8}>
                 <Ionicons name="chevron-back-circle" size={28} color={colors.accent} />
               </Pressable>
-              <Text style={[typography.headline, { color: colors.text }]}>
-                {dateInput === todayISO() ? 'Today' : formatFriendly(dateInput)}
-              </Text>
+              <Pressable
+                style={[styles.datePickerBtn, { backgroundColor: colors.inputBackground }]}
+                onPress={() => setCalendarOpen(true)}
+              >
+                <Ionicons name="calendar-outline" size={18} color={colors.accent} />
+                <Text style={[typography.headline, { color: colors.text }]}>
+                  {dateInput === todayISO() ? 'Today' : formatFriendly(dateInput)}
+                </Text>
+              </Pressable>
               <Pressable onPress={() => shiftDate(1)} hitSlop={8}>
                 <Ionicons
                   name="chevron-forward-circle"
@@ -233,6 +247,14 @@ export default function BodyWeightScreen() {
           </View>
         </View>
       </Modal>
+
+      <CalendarPicker
+        visible={calendarOpen}
+        value={dateInput}
+        onSelect={setDateInput}
+        onClose={() => setCalendarOpen(false)}
+        maxDate={new Date()}
+      />
     </SafeAreaView>
   );
 }
@@ -266,22 +288,44 @@ const styles = StyleSheet.create({
     borderRadius: radius.xl,
     padding: spacing.xl,
     gap: spacing.lg,
+    overflow: 'hidden',
   },
-  weightInputRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  weightInput: {
-    flex: 1,
+  weightField: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'stretch',
     borderRadius: radius.md,
     borderWidth: 1,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    fontSize: 28,
+    paddingLeft: spacing.lg,
+    paddingRight: spacing.md,
+    paddingVertical: spacing.sm,
+    gap: spacing.sm,
+    overflow: 'hidden',
+  },
+  weightInput: {
+    flex: 1,
+    minWidth: 0,
+    fontSize: 32,
     fontWeight: '700',
     textAlign: 'center',
+    paddingVertical: spacing.sm,
+    paddingHorizontal: 0,
+  },
+  weightUnit: {
+    flexShrink: 0,
   },
   dateRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  datePickerBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.pill,
   },
   promptButtons: { flexDirection: 'row', gap: spacing.md },
   promptButton: { flex: 1 },

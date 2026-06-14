@@ -14,16 +14,6 @@ export const WEEKDAY_LABELS: Record<WeekdayKey, string> = {
   sun: 'Sunday',
 };
 
-export const WEEKDAY_SHORT: Record<WeekdayKey, string> = {
-  mon: 'Mon',
-  tue: 'Tue',
-  wed: 'Wed',
-  thu: 'Thu',
-  fri: 'Fri',
-  sat: 'Sat',
-  sun: 'Sun',
-};
-
 export function toISODate(d: Date): ISODate {
   return format(d, 'yyyy-MM-dd');
 }

@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 
+import { shadow } from '@/theme/shadow';
 import { radius, spacing } from '@/theme/spacing';
 import { useTheme } from '@/theme/useTheme';
 
@@ -18,8 +19,8 @@ export function Card({ children, style }: CardProps) {
         {
           backgroundColor: colors.card,
           borderColor: colors.border,
-          shadowOpacity: isDark ? 0 : 0.06,
         },
+        shadow(isDark ? 0 : 0.06, 12, 4),
         style,
       ]}
     >
@@ -33,9 +34,5 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     borderWidth: StyleSheet.hairlineWidth,
     padding: spacing.lg,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 12,
-    elevation: 2,
   },
 });

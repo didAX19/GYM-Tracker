@@ -20,8 +20,15 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/images/favicon.png",
+      "name": "Gym Tracker",
+      "shortName": "Gym Tracker",
+      "display": "standalone",
+      "orientation": "portrait",
+      "themeColor": "#0B0F16",
+      "backgroundColor": "#0B0F16"
     },
     "plugins": [
       "expo-router",
@@ -37,7 +44,8 @@
       ]
     ],
     "experiments": {
-      "typedRoutes": true
+      "typedRoutes": true,
+      "baseUrl": "/GYM-Tracker"
     }
   }
 }

@@ -36,8 +36,22 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
-example
+# Expo starter example folder (if created during tutorial)
+app-example
+
+# temporary local export / test output (not the committed dist/ workflow)
+.tmp-web/
+.tmp-*/
 
 # generated native folders
 /ios
 /android
+
+# Windows
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+
+# Editor / local developer notes (not for public repo)
+.vscode/
+README.private.md

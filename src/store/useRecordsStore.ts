@@ -40,7 +40,3 @@ export const useRecordsStore = create<RecordsState>()(
     { name: storageKeys.records, storage: createPersistStorage() }
   )
 );
-
-export function getRecordFor(records: ExerciseRecord[], exerciseId: string) {
-  return records.find((r) => r.exerciseId === exerciseId);
-}
