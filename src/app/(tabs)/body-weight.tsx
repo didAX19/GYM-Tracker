@@ -180,7 +180,15 @@ export default function BodyWeightScreen() {
           <View style={[styles.promptCard, { backgroundColor: colors.cardElevated }]}>
             <Text style={[typography.title, { color: colors.text }]}>Log Body Weight</Text>
 
-            <View style={styles.weightInputRow}>
+            <View
+              style={[
+                styles.weightField,
+                {
+                  backgroundColor: colors.inputBackground,
+                  borderColor: colors.border,
+                },
+              ]}
+            >
               <TextInput
                 value={weightInput}
                 onChangeText={setWeightInput}
@@ -188,16 +196,11 @@ export default function BodyWeightScreen() {
                 placeholder="0.0"
                 placeholderTextColor={colors.textTertiary}
                 autoFocus
-                style={[
-                  styles.weightInput,
-                  {
-                    backgroundColor: colors.inputBackground,
-                    color: colors.text,
-                    borderColor: colors.border,
-                  },
-                ]}
+                style={[styles.weightInput, { color: colors.text }]}
               />
-              <Text style={[typography.title, { color: colors.textSecondary }]}>kg</Text>
+              <Text style={[typography.title, styles.weightUnit, { color: colors.textSecondary }]}>
+                kg
+              </Text>
             </View>
 
             <View style={styles.dateRow}>
@@ -266,17 +269,31 @@ const styles = StyleSheet.create({
     borderRadius: radius.xl,
     padding: spacing.xl,
     gap: spacing.lg,
+    overflow: 'hidden',
   },
-  weightInputRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  weightInput: {
-    flex: 1,
+  weightField: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'stretch',
     borderRadius: radius.md,
     borderWidth: 1,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    fontSize: 28,
+    paddingLeft: spacing.lg,
+    paddingRight: spacing.md,
+    paddingVertical: spacing.sm,
+    gap: spacing.sm,
+    overflow: 'hidden',
+  },
+  weightInput: {
+    flex: 1,
+    minWidth: 0,
+    fontSize: 32,
     fontWeight: '700',
     textAlign: 'center',
+    paddingVertical: spacing.sm,
+    paddingHorizontal: 0,
+  },
+  weightUnit: {
+    flexShrink: 0,
   },
   dateRow: {
     flexDirection: 'row',
