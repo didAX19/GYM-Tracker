@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { shadow } from '@/theme/shadow';
 import { radius, spacing } from '@/theme/spacing';
 import { useTheme } from '@/theme/useTheme';
 
@@ -54,12 +55,6 @@ const styles = StyleSheet.create({
     borderRadius: radius.md - 3,
     alignItems: 'center',
   },
-  selectedShadow: {
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 2,
-  },
+  selectedShadow: shadow(0.08, 4, 1),
   label: { fontSize: 13, fontWeight: '500' },
 });

@@ -27,6 +27,39 @@ A personal gym program tracker built with Expo (React Native) + TypeScript. Offl
 
 If the connection fails on restrictive networks, run `npx expo start --tunnel`.
 
+## Using it as an iPhone Home Screen app (web / PWA)
+
+The app is configured to run as an installable, offline-capable web app that
+behaves like a native app when added to the iPhone Home Screen (full-screen,
+safe-area aware, no browser chrome).
+
+1. Build the static web app:
+
+   ```bash
+   npx expo export --platform web
+   ```
+
+   The output is written to `dist/`.
+
+2. Host `dist/` on any static host (GitHub Pages, Netlify, Vercel, Cloudflare
+   Pages, etc.). It must be served over **HTTPS** for Home Screen install to work.
+
+3. On the iPhone, open the hosted URL in **Safari**, tap the **Share** button,
+   then **Add to Home Screen**.
+
+4. Launch it from the Home Screen icon — it opens full-screen with no address
+   bar and stores all data locally on the device.
+
+To preview locally during development:
+
+```bash
+npx expo start --web
+```
+
+PWA configuration lives in [src/app/+html.tsx](src/app/+html.tsx) (meta tags,
+safe areas, app-like CSS) and [public/manifest.webmanifest](public/manifest.webmanifest)
+(name, icons, standalone display). Home Screen icons are in [public/](public/).
+
 ## Tech stack
 
 - Expo SDK 54 + Expo Router (file-based navigation)
