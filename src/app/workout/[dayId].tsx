@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -29,6 +28,7 @@ import { radius, spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 import { useTheme } from '@/theme/useTheme';
 import { estimateDurationMin, formatWeight } from '@/utils/calc';
+import { confirm } from '@/utils/confirm';
 import { todayISO } from '@/utils/date';
 
 export default function WorkoutSessionScreen() {
@@ -116,33 +116,27 @@ export default function WorkoutSessionScreen() {
     }
   };
 
-  const confirmFinish = () => {
+  const confirmFinish = async () => {
     if (!hasAnyInput) {
-      Alert.alert('Finish Workout', 'No weights entered yet. Finish anyway?', [
-        { text: 'Keep Training', style: 'cancel' },
-        { text: 'Finish', onPress: finishWorkout },
-      ]);
+      const ok = await confirm('Finish Workout', 'No weights entered yet. Finish anyway?', {
+        confirmLabel: 'Finish',
+        cancelLabel: 'Keep Training',
+      });
+      if (ok) finishWorkout();
     } else {
       finishWorkout();
     }
   };
 
-  const confirmCancel = () => {
-    Alert.alert(
+  const confirmCancel = async () => {
+    const ok = await confirm(
       'Cancel Workout',
       'This discards all weights entered in this session. You can start over afterwards.',
-      [
-        { text: 'Keep Training', style: 'cancel' },
-        {
-          text: 'Cancel Workout',
-          style: 'destructive',
-          onPress: () => {
-            clearSession();
-            router.back();
-          },
-        },
-      ]
+      { confirmLabel: 'Cancel Workout', cancelLabel: 'Keep Training' }
     );
+    if (!ok) return;
+    clearSession();
+    router.back();
   };
 
   return (

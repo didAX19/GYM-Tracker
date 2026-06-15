@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import {
-  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -20,6 +19,7 @@ import { useProgramStore } from '@/store/useProgramStore';
 import { radius, spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 import { useTheme } from '@/theme/useTheme';
+import { confirm } from '@/utils/confirm';
 
 function Stepper({
   value,
@@ -87,18 +87,15 @@ export default function EditDayScreen() {
     );
   }
 
-  const confirmDelete = () => {
-    Alert.alert('Delete Workout Day', `Delete "${day.name}"? This cannot be undone.`, [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () => {
-          deleteDay(day.id);
-          router.back();
-        },
-      },
-    ]);
+  const confirmDelete = async () => {
+    const ok = await confirm(
+      'Delete Workout Day',
+      `Delete "${day.name}"? This cannot be undone.`,
+      { confirmLabel: 'Delete' }
+    );
+    if (!ok) return;
+    deleteDay(day.id);
+    router.back();
   };
 
   return (

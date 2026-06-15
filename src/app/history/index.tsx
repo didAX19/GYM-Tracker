@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React from 'react';
-import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Card } from '@/components/Card';
 import { EmptyState } from '@/components/EmptyState';
@@ -11,6 +11,7 @@ import { spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 import { useTheme } from '@/theme/useTheme';
 import { formatWeight } from '@/utils/calc';
+import { confirm } from '@/utils/confirm';
 import { formatFriendly, todayISO } from '@/utils/date';
 
 export default function WorkoutHistoryScreen() {
@@ -19,11 +20,13 @@ export default function WorkoutHistoryScreen() {
   const removeWorkout = useHistoryStore((s) => s.removeWorkout);
   const days = useProgramStore((s) => s.days);
 
-  const confirmDelete = (id: string, name: string) => {
-    Alert.alert('Delete Workout', `Remove "${name}" from your history? This cannot be undone.`, [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => removeWorkout(id) },
-    ]);
+  const confirmDelete = async (id: string, name: string) => {
+    const ok = await confirm(
+      'Delete Workout',
+      `Remove "${name}" from your history? This cannot be undone.`,
+      { confirmLabel: 'Delete' }
+    );
+    if (ok) removeWorkout(id);
   };
 
   return (
@@ -55,12 +58,13 @@ export default function WorkoutHistoryScreen() {
             const isToday = item.date === todayISO();
 
             return (
-              <Pressable
-                onPress={() =>
-                  router.push({ pathname: '/history/[entryId]', params: { entryId: item.id } })
-                }
-              >
-                <Card style={styles.row}>
+              <Card style={styles.row}>
+                <Pressable
+                  style={styles.rowMain}
+                  onPress={() =>
+                    router.push({ pathname: '/history/[entryId]', params: { entryId: item.id } })
+                  }
+                >
                   <Text style={{ fontSize: 24 }}>💪</Text>
                   <View style={styles.rowText}>
                     <View style={styles.titleRow}>
@@ -80,16 +84,16 @@ export default function WorkoutHistoryScreen() {
                       {topWeight > 0 ? ` · top ${formatWeight(topWeight)}` : ''}
                     </Text>
                   </View>
-                  <Pressable
-                    hitSlop={8}
-                    onPress={() => confirmDelete(item.id, name)}
-                    style={styles.deleteBtn}
-                  >
-                    <Ionicons name="trash-outline" size={20} color={colors.danger} />
-                  </Pressable>
                   <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
-                </Card>
-              </Pressable>
+                </Pressable>
+                <Pressable
+                  hitSlop={8}
+                  onPress={() => void confirmDelete(item.id, name)}
+                  style={styles.deleteBtn}
+                >
+                  <Ionicons name="trash-outline" size={20} color={colors.danger} />
+                </Pressable>
+              </Card>
             );
           }}
         />
@@ -101,7 +105,8 @@ export default function WorkoutHistoryScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   list: { padding: spacing.lg, gap: spacing.md },
-  row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  row: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  rowMain: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   rowText: { flex: 1 },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   todayBadge: {

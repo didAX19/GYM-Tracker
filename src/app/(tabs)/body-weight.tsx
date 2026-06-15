@@ -40,7 +40,6 @@ export default function BodyWeightScreen() {
   const [weightInput, setWeightInput] = useState('');
   const [dateInput, setDateInput] = useState(todayISO());
   const [calendarOpen, setCalendarOpen] = useState(false);
-  const [weightFocused, setWeightFocused] = useState(false);
 
   const sorted = useMemo(() => sortByDateDesc(entries), [entries]);
   const current = sorted[0];
@@ -188,7 +187,7 @@ export default function BodyWeightScreen() {
                 styles.weightField,
                 {
                   backgroundColor: colors.inputBackground,
-                  borderColor: weightFocused ? colors.accent : colors.border,
+                  borderColor: colors.border,
                 },
               ]}
             >
@@ -199,8 +198,6 @@ export default function BodyWeightScreen() {
                 placeholder="0.0"
                 placeholderTextColor={colors.textTertiary}
                 autoFocus
-                onFocus={() => setWeightFocused(true)}
-                onBlur={() => setWeightFocused(false)}
                 style={[styles.weightInput, { color: colors.text }]}
               />
               <Text style={[typography.title, styles.weightUnit, { color: colors.textSecondary }]}>

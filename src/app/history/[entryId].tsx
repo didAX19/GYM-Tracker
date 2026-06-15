@@ -1,6 +1,6 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import React from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
@@ -13,6 +13,7 @@ import { radius, spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 import { useTheme } from '@/theme/useTheme';
 import { formatWeight } from '@/utils/calc';
+import { confirm } from '@/utils/confirm';
 import { formatFriendly } from '@/utils/date';
 
 export default function WorkoutHistoryDetailScreen() {
@@ -50,18 +51,15 @@ export default function WorkoutHistoryDetailScreen() {
     0
   );
 
-  const confirmDelete = () => {
-    Alert.alert('Delete Workout', `Remove "${name}" from your history? This cannot be undone.`, [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () => {
-          removeWorkout(entry.id);
-          router.back();
-        },
-      },
-    ]);
+  const confirmDelete = async () => {
+    const ok = await confirm(
+      'Delete Workout',
+      `Remove "${name}" from your history? This cannot be undone.`,
+      { confirmLabel: 'Delete' }
+    );
+    if (!ok) return;
+    removeWorkout(entry.id);
+    router.back();
   };
 
   return (

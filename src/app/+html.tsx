@@ -69,12 +69,14 @@ input, textarea {
   -webkit-user-select: text;
   user-select: text;
 }
-/* Drop the default browser focus ring; inputs show their own focus styling. */
+/* Drop the default browser focus ring; inputs use wrapper styling instead. */
 input:focus,
 input:focus-visible,
 textarea:focus,
 textarea:focus-visible {
-  outline: none;
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent;
 }
 /* Center the app in a phone-sized frame on large (desktop) screens. */
 #root {
