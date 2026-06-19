@@ -24,12 +24,13 @@ export default function Root({ children }: { children: React.ReactNode }) {
         <meta name="application-name" content="Gym Tracker" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
         <meta name="apple-mobile-web-app-title" content="Gym Tracker" />
 
         {/* Status bar / browser chrome color, theme-aware */}
         <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F2F4F8" />
         <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0B0F16" />
+        <meta name="theme-color" content="#0B0F16" />
 
         <link rel="manifest" href="/manifest.webmanifest" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -38,6 +39,7 @@ export default function Root({ children }: { children: React.ReactNode }) {
         <ScrollViewStyleReset />
 
         <style dangerouslySetInnerHTML={{ __html: appShellStyles }} />
+        <script dangerouslySetInnerHTML={{ __html: themeShellScript }} />
       </head>
       <body>{children}</body>
     </html>
@@ -48,14 +50,20 @@ const appShellStyles = `
 html, body, #root {
   height: 100%;
 }
+html {
+  /* iOS standalone paints the status-bar region from the html background. */
+  background-color: #F2F4F8;
+}
 body {
   /* Prevent the whole page from rubber-band scrolling; inner ScrollViews scroll instead. */
   overscroll-behavior-y: none;
   -webkit-tap-highlight-color: transparent;
   background-color: #F2F4F8;
+  min-height: 100%;
+  min-height: 100dvh;
 }
 @media (prefers-color-scheme: dark) {
-  body { background-color: #0B0F16; }
+  html, body { background-color: #0B0F16; }
 }
 * {
   /* App-like: no long-press text selection or callouts, faster taps. */
@@ -87,4 +95,22 @@ textarea:focus-visible {
 /* Hide scrollbars for a cleaner, native feel. */
 ::-webkit-scrollbar { display: none; }
 * { scrollbar-width: none; }
+`;
+
+/** Sync status-bar style and chrome color with system theme before React hydrates. */
+const themeShellScript = `
+(function () {
+  function apply() {
+    var dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var bg = dark ? '#0B0F16' : '#F2F4F8';
+    document.documentElement.style.backgroundColor = bg;
+    document.body.style.backgroundColor = bg;
+    var status = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+    if (status) status.setAttribute('content', dark ? 'black' : 'default');
+    var theme = document.querySelector('meta[name="theme-color"]:not([media])');
+    if (theme) theme.setAttribute('content', bg);
+  }
+  apply();
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', apply);
+})();
 `;
