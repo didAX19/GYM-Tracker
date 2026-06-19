@@ -55,3 +55,6 @@ ehthumbs.db
 # Editor / local developer notes (not for public repo)
 .vscode/
 README.private.md
+
+# Cursor agent skills
+.cursor/skills/ui-ux-pro-max/scripts/__pycache__/
