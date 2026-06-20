@@ -24,7 +24,7 @@ export default function Root({ children }: { children: React.ReactNode }) {
         <meta name="application-name" content="Gym Tracker" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Gym Tracker" />
 
         {/* Status bar / browser chrome color, theme-aware */}
@@ -47,25 +47,38 @@ export default function Root({ children }: { children: React.ReactNode }) {
 }
 
 const appShellStyles = `
+:root {
+  --app-bg: #F4F2EE;
+}
 html, body, #root {
   height: 100%;
+  background-color: var(--app-bg);
 }
 html {
   /* iOS standalone paints the status-bar region from the html background. */
-  background-color: #F4F2EE;
-  /* Match form controls, scrollbars and caret to the active system theme. */
   color-scheme: light dark;
 }
 body {
   /* Prevent the whole page from rubber-band scrolling; inner ScrollViews scroll instead. */
   overscroll-behavior-y: none;
   -webkit-tap-highlight-color: transparent;
-  background-color: #F4F2EE;
   min-height: 100%;
   min-height: 100dvh;
 }
 @media (prefers-color-scheme: dark) {
-  html, body { background-color: #0C0D10; }
+  :root { --app-bg: #0C0D10; }
+}
+/* Paint the notch / status-bar inset before React mounts (RN Web safe-area padding can miss this). */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: env(safe-area-inset-top, 0px);
+  background-color: var(--app-bg);
+  z-index: 9999;
+  pointer-events: none;
 }
 * {
   /* App-like: no long-press text selection or callouts, faster taps. */
@@ -93,6 +106,9 @@ textarea:focus-visible {
   max-width: 600px;
   margin: 0 auto;
   width: 100%;
+  min-height: 100%;
+  min-height: 100dvh;
+  background-color: var(--app-bg);
 }
 /* Hide scrollbars for a cleaner, native feel. */
 ::-webkit-scrollbar { display: none; }
@@ -105,10 +121,11 @@ const themeShellScript = `
   function apply() {
     var dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     var bg = dark ? '#0C0D10' : '#F4F2EE';
+    document.documentElement.style.setProperty('--app-bg', bg);
     document.documentElement.style.backgroundColor = bg;
     document.body.style.backgroundColor = bg;
     var status = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
-    if (status) status.setAttribute('content', dark ? 'black' : 'default');
+    if (status) status.setAttribute('content', dark ? 'black-translucent' : 'default');
     var theme = document.querySelector('meta[name="theme-color"]:not([media])');
     if (theme) theme.setAttribute('content', bg);
   }

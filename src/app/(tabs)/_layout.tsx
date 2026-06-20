@@ -7,43 +7,49 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { fontFamily } from '@/theme/typography';
 import { useTheme } from '@/theme/useTheme';
 
-const TAB_BAR_HEIGHT = 49;
-
-function useTabBarBottomInset(): number {
+/**
+ * Bottom inset for the tab bar on web PWAs.
+ * React Navigation already applies `paddingBottom: insets.bottom` and sets
+ * total height to 49 + inset — do NOT also set height/padding on tabBarStyle.
+ */
+function useWebTabBarBottomInset(): number {
   const insets = useSafeAreaInsets();
   if (Platform.OS !== 'web') return 0;
-
   if (insets.bottom > 0) return insets.bottom;
-
-  // iOS Home Screen PWA: env() insets are sometimes 0 until layout; use standalone fallback.
-  if (typeof navigator !== 'undefined' && (navigator as Navigator & { standalone?: boolean }).standalone) {
+  if (
+    typeof navigator !== 'undefined' &&
+    (navigator as Navigator & { standalone?: boolean }).standalone
+  ) {
     return 34;
   }
-
   return 0;
 }
 
+const TAB_ICON_SIZE = 24;
+
 export default function TabsLayout() {
   const { colors } = useTheme();
-  const bottomInset = useTabBarBottomInset();
+  const webBottomInset = useWebTabBarBottomInset();
 
   return (
     <Tabs
+      {...(Platform.OS === 'web' && webBottomInset > 0
+        ? {
+            safeAreaInsets: { top: 0, left: 0, right: 0, bottom: webBottomInset },
+          }
+        : {})}
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.textTertiary,
         tabBarLabelStyle: {
           fontFamily: fontFamily.semibold,
-          fontSize: 11,
-          letterSpacing: 0.2,
+          fontSize: 10,
+          lineHeight: 12,
         },
         tabBarStyle: {
           backgroundColor: colors.tabBar,
           borderTopColor: colors.border,
-          ...(Platform.OS === 'web' && bottomInset > 0
-            ? { paddingBottom: bottomInset, height: TAB_BAR_HEIGHT + bottomInset }
-            : {}),
         },
       }}
     >
@@ -51,21 +57,21 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: 'Dashboard',
-          tabBarIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} />,
+          tabBarIcon: ({ color }) => <Ionicons name="home" size={TAB_ICON_SIZE} color={color} />,
         }}
       />
       <Tabs.Screen
         name="program"
         options={{
           title: 'Program',
-          tabBarIcon: ({ color, size }) => <Ionicons name="barbell" size={size} color={color} />,
+          tabBarIcon: ({ color }) => <Ionicons name="barbell" size={TAB_ICON_SIZE} color={color} />,
         }}
       />
       <Tabs.Screen
         name="body-weight"
         options={{
-          title: 'Body Weight',
-          tabBarIcon: ({ color, size }) => <Ionicons name="scale" size={size} color={color} />,
+          title: 'Weight',
+          tabBarIcon: ({ color }) => <Ionicons name="scale" size={TAB_ICON_SIZE} color={color} />,
         }}
       />
     </Tabs>

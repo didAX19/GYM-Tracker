@@ -11,6 +11,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect } from 'react';
+import { Platform } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { darkColors, lightColors } from '@/theme/colors';
@@ -35,6 +36,19 @@ export default function RootLayout() {
   useEffect(() => {
     if (fontsLoaded) SplashScreen.hideAsync().catch(() => {});
   }, [fontsLoaded]);
+
+  // Keep the static HTML shell (status bar / safe-area paint) in sync with the app theme.
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof document === 'undefined') return;
+    const bg = palette.background;
+    document.documentElement.style.setProperty('--app-bg', bg);
+    document.documentElement.style.backgroundColor = bg;
+    document.body.style.backgroundColor = bg;
+    const themeMeta = document.querySelector('meta[name="theme-color"]:not([media])');
+    if (themeMeta) themeMeta.setAttribute('content', bg);
+    const statusMeta = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+    if (statusMeta) statusMeta.setAttribute('content', isDark ? 'black-translucent' : 'default');
+  }, [palette.background, isDark]);
 
   if (!fontsLoaded) return null;
 
