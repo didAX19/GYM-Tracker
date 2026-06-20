@@ -1,16 +1,42 @@
+import { BebasNeue_400Regular } from '@expo-google-fonts/bebas-neue';
+import {
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+} from '@expo-google-fonts/inter';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { darkColors, lightColors } from '@/theme/colors';
+import { fontFamily } from '@/theme/typography';
 import { useTheme } from '@/theme/useTheme';
 import '@/utils/suppressWebWarnings';
+
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 export default function RootLayout() {
   const { isDark } = useTheme();
   const palette = isDark ? darkColors : lightColors;
+
+  const [fontsLoaded] = useFonts({
+    BebasNeue_400Regular,
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+  });
+
+  useEffect(() => {
+    if (fontsLoaded) SplashScreen.hideAsync().catch(() => {});
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) return null;
 
   const navTheme = {
     ...(isDark ? DarkTheme : DefaultTheme),
@@ -30,7 +56,13 @@ export default function RootLayout() {
         <Stack
           screenOptions={{
             headerTintColor: palette.accent,
-            headerTitleStyle: { color: palette.text, fontWeight: '700' },
+            headerStyle: { backgroundColor: palette.background },
+            headerShadowVisible: false,
+            headerTitleStyle: {
+              color: palette.text,
+              fontFamily: fontFamily.display,
+              fontSize: 22,
+            },
             contentStyle: { backgroundColor: palette.background },
           }}
         >

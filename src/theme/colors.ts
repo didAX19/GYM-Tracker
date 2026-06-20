@@ -7,53 +7,76 @@ export interface ThemeColors {
   textTertiary: string;
   accent: string;
   accentSoft: string;
+  /** Text/icon color that sits on top of a solid `accent` fill. */
+  onAccent: string;
   success: string;
   successSoft: string;
   warning: string;
   danger: string;
+  dangerSoft: string;
   border: string;
+  /** A heavier border for emphasis (dividers under headers, key cards). */
+  borderStrong: string;
   inputBackground: string;
   chartLine: string;
   chartFill: string;
   tabBar: string;
+  /** Scrim behind modals / sheets. */
+  overlay: string;
 }
 
+/**
+ * "Iron & Ember" — a warm, high-contrast strength-training palette.
+ * Molten ember orange against near-black charcoal, with a lime-green
+ * reserved exclusively for personal records and positive progress.
+ */
 export const lightColors: ThemeColors = {
-  background: '#F2F4F8',
+  background: '#F4F2EE',
   card: '#FFFFFF',
   cardElevated: '#FFFFFF',
-  text: '#0B1220',
-  textSecondary: '#5B6472',
-  textTertiary: '#8C94A3',
-  accent: '#2F6BFF',
-  accentSoft: '#E4ECFF',
-  success: '#1FA75C',
-  successSoft: '#E2F6EA',
-  warning: '#E8A11B',
-  danger: '#E5484D',
-  border: '#E3E7EE',
-  inputBackground: '#F2F4F8',
-  chartLine: '#2F6BFF',
-  chartFill: 'rgba(47, 107, 255, 0.16)',
+  text: '#15171C',
+  textSecondary: '#565C66',
+  textTertiary: '#6E747C',
+  // Ember deepens for daylight so it keeps a 4.5:1+ contrast on white.
+  accent: '#C2410C',
+  accentSoft: '#FBE7DC',
+  onAccent: '#FFFFFF',
+  success: '#2F8F2A',
+  successSoft: '#E3F5DC',
+  warning: '#B7791F',
+  danger: '#D33A3F',
+  dangerSoft: '#FBE3E4',
+  border: '#E6E2DB',
+  borderStrong: '#D7D2C9',
+  inputBackground: '#EFEDE7',
+  chartLine: '#C2410C',
+  chartFill: 'rgba(194, 65, 12, 0.14)',
   tabBar: '#FFFFFF',
+  overlay: 'rgba(20, 18, 14, 0.45)',
 };
 
 export const darkColors: ThemeColors = {
-  background: '#0B0F16',
-  card: '#161C26',
-  cardElevated: '#1D2533',
-  text: '#F2F5FA',
-  textSecondary: '#9AA4B5',
-  textTertiary: '#6C7686',
-  accent: '#4D82FF',
-  accentSoft: '#1B2942',
-  success: '#34C77B',
-  successSoft: '#13301F',
-  warning: '#F0B03F',
-  danger: '#F2555A',
-  border: '#242D3C',
-  inputBackground: '#0F141D',
-  chartLine: '#4D82FF',
-  chartFill: 'rgba(77, 130, 255, 0.20)',
-  tabBar: '#10151E',
+  background: '#0C0D10',
+  card: '#15171C',
+  cardElevated: '#1C1F26',
+  text: '#F4F2EF',
+  textSecondary: '#A2A8B2',
+  textTertiary: '#868D96',
+  // Full-strength molten ember on the dark canvas.
+  accent: '#FF6A2B',
+  accentSoft: '#2A1710',
+  // Ink text on the bright ember fill reads far better than white (8:1+).
+  onAccent: '#0C0D10',
+  success: '#9BE564',
+  successSoft: '#1B2A12',
+  warning: '#F2B705',
+  danger: '#FF5A5F',
+  dangerSoft: '#2C1416',
+  border: '#262A31',
+  borderStrong: '#333944',
+  inputBackground: '#111318',
+  chartLine: '#FF6A2B',
+  chartFill: 'rgba(255, 106, 43, 0.18)',
+  tabBar: '#0E1014',
+  overlay: 'rgba(0, 0, 0, 0.62)',
 };

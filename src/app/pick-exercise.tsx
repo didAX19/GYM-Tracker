@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 
 import { Button } from '@/components/Button';
+import { ExerciseIcon } from '@/components/ExerciseIcon';
 import { CATEGORIES } from '@/data/builtInExercises';
 import { Exercise, ExerciseCategory } from '@/data/types';
 import { useExerciseStore } from '@/store/useExerciseStore';
@@ -96,6 +97,8 @@ export default function PickExerciseScreen() {
               <Pressable
                 key={cat}
                 onPress={() => setCategoryFilter(selected ? null : cat)}
+                accessibilityRole="button"
+                accessibilityState={{ selected }}
                 style={[
                   styles.chip,
                   {
@@ -106,8 +109,8 @@ export default function PickExerciseScreen() {
               >
                 <Text
                   style={[
-                    typography.subhead,
-                    { color: selected ? '#FFF' : colors.textSecondary },
+                    typography.subheadStrong,
+                    { color: selected ? colors.onAccent : colors.textSecondary },
                   ]}
                 >
                   {cat}
@@ -122,7 +125,7 @@ export default function PickExerciseScreen() {
           style={[styles.customToggle, { borderColor: colors.accent }]}
         >
           <Ionicons name={creating ? 'chevron-up' : 'add'} size={18} color={colors.accent} />
-          <Text style={[typography.subhead, { color: colors.accent, fontWeight: '700' }]}>
+          <Text style={[typography.subheadStrong, { color: colors.accent }]}>
             Create custom exercise
           </Text>
         </Pressable>
@@ -151,6 +154,8 @@ export default function PickExerciseScreen() {
                     <Pressable
                       key={cat}
                       onPress={() => setCustomCategory(cat)}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected }}
                       style={[
                         styles.chip,
                         {
@@ -162,7 +167,7 @@ export default function PickExerciseScreen() {
                       <Text
                         style={[
                           typography.caption,
-                          { color: selected ? '#FFF' : colors.textSecondary },
+                          { color: selected ? colors.onAccent : colors.textSecondary },
                         ]}
                       >
                         {cat}
@@ -185,9 +190,9 @@ export default function PickExerciseScreen() {
         renderSectionHeader={({ section }) => (
           <Text
             style={[
-              typography.caption,
+              typography.overline,
               styles.sectionHeader,
-              { color: colors.textSecondary },
+              { color: colors.textTertiary },
             ]}
           >
             {section.title.toUpperCase()}
@@ -198,12 +203,14 @@ export default function PickExerciseScreen() {
           return (
             <Pressable
               onPress={() => pick(item)}
+              accessibilityRole="button"
+              accessibilityLabel={`${added ? 'Already added: ' : 'Add '}${item.name}`}
               style={[
                 styles.row,
                 { backgroundColor: colors.card, borderColor: colors.border },
               ]}
             >
-              <Text style={{ fontSize: 20 }}>{item.icon}</Text>
+              <ExerciseIcon category={item.category} size={18} />
               <View style={styles.rowText}>
                 <Text style={[typography.headline, { color: colors.text }]}>{item.name}</Text>
                 {item.isCustom && (
@@ -211,9 +218,9 @@ export default function PickExerciseScreen() {
                 )}
               </View>
               {added ? (
-                <Ionicons name="checkmark-circle" size={22} color={colors.success} />
+                <Ionicons name="checkmark-circle" size={24} color={colors.success} />
               ) : (
-                <Ionicons name="add-circle-outline" size={22} color={colors.accent} />
+                <Ionicons name="add-circle-outline" size={24} color={colors.accent} />
               )}
             </Pressable>
           );

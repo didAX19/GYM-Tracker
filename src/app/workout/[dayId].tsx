@@ -17,6 +17,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { EmptyState } from '@/components/EmptyState';
+import { ExerciseIcon } from '@/components/ExerciseIcon';
 import { PRCelebration, PRResult } from '@/components/PRCelebration';
 import { SetEntry } from '@/data/types';
 import { useExerciseStore } from '@/store/useExerciseStore';
@@ -25,7 +26,7 @@ import { useProgramStore } from '@/store/useProgramStore';
 import { useRecordsStore } from '@/store/useRecordsStore';
 import { useSessionStore } from '@/store/useSessionStore';
 import { radius, spacing } from '@/theme/spacing';
-import { typography } from '@/theme/typography';
+import { fontFamily, typography } from '@/theme/typography';
 import { useTheme } from '@/theme/useTheme';
 import { estimateDurationMin, formatWeight } from '@/utils/calc';
 import { confirm } from '@/utils/confirm';
@@ -74,7 +75,7 @@ export default function WorkoutSessionScreen() {
   if (!day) {
     return (
       <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]}>
-        <EmptyState icon="❓" title="Workout not found" message="This workout day no longer exists." />
+        <EmptyState icon="help-circle-outline" title="Workout not found" message="This workout day no longer exists." />
         <Button label="Close" onPress={() => router.back()} style={{ margin: spacing.lg }} />
       </SafeAreaView>
     );
@@ -148,7 +149,12 @@ export default function WorkoutSessionScreen() {
             {day.exercises.length} exercises · ~{estimateDurationMin(day)} min
           </Text>
         </View>
-        <Pressable onPress={() => router.back()} hitSlop={8}>
+        <Pressable
+          onPress={() => router.back()}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel="Close workout"
+        >
           <Ionicons name="close-circle" size={32} color={colors.textTertiary} />
         </Pressable>
       </View>
@@ -172,7 +178,11 @@ export default function WorkoutSessionScreen() {
               <Animated.View key={we.id} entering={FadeInDown.delay(idx * 60).springify()}>
                 <Card style={styles.exerciseCard}>
                   <View style={styles.exerciseHeader}>
-                    <Text style={{ fontSize: 24 }}>{exercise?.icon ?? '🏋️'}</Text>
+                    {exercise ? (
+                      <ExerciseIcon category={exercise.category} />
+                    ) : (
+                      <ExerciseIcon category="Chest" />
+                    )}
                     <View style={styles.flex}>
                       <Text style={[typography.headline, { color: colors.text }]}>
                         {exercise?.name ?? 'Unknown exercise'}
@@ -186,13 +196,15 @@ export default function WorkoutSessionScreen() {
 
                   <View style={styles.statsRow}>
                     <View style={[styles.statPill, { backgroundColor: colors.successSoft }]}>
-                      <Text style={[typography.caption, { color: colors.success, fontWeight: '700' }]}>
-                        Best: {record ? formatWeight(record.maxWeightKg) : '—'}
+                      <Text style={[styles.statPillLabel, { color: colors.success }]}>BEST</Text>
+                      <Text style={[styles.statPillValue, { color: colors.success }]}>
+                        {record ? formatWeight(record.maxWeightKg) : '—'}
                       </Text>
                     </View>
                     <View style={[styles.statPill, { backgroundColor: colors.accentSoft }]}>
-                      <Text style={[typography.caption, { color: colors.accent, fontWeight: '700' }]}>
-                        Last: {lastMax != null ? formatWeight(lastMax) : '—'}
+                      <Text style={[styles.statPillLabel, { color: colors.accent }]}>LAST</Text>
+                      <Text style={[styles.statPillValue, { color: colors.accent }]}>
+                        {lastMax != null ? formatWeight(lastMax) : '—'}
                       </Text>
                     </View>
                   </View>
@@ -208,6 +220,7 @@ export default function WorkoutSessionScreen() {
                           onChangeText={(t) => setSessionWeight(we.id, setIdx, we.sets, t)}
                           keyboardType="decimal-pad"
                           placeholder="0"
+                          accessibilityLabel={`${exercise?.name ?? 'Exercise'} set ${setIdx + 1} weight in kilograms`}
                           placeholderTextColor={colors.textTertiary}
                           style={[
                             styles.weightInput,
@@ -266,10 +279,15 @@ const styles = StyleSheet.create({
   exerciseHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   statsRow: { flexDirection: 'row', gap: spacing.sm },
   statPill: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: spacing.xs,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs + 2,
-    borderRadius: radius.pill,
+    borderRadius: radius.sm,
   },
+  statPillLabel: { fontFamily: fontFamily.bold, fontSize: 10, letterSpacing: 1 },
+  statPillValue: { fontFamily: fontFamily.semibold, fontSize: 13 },
   setsContainer: { gap: spacing.sm },
   setRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   setLabel: { width: 50 },
@@ -280,7 +298,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm + 2,
     fontSize: 17,
-    fontWeight: '600',
+    fontFamily: fontFamily.semibold,
     textAlign: 'center',
   },
   footer: {

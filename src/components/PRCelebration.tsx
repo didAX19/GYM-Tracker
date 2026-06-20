@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import React, { useEffect } from 'react';
 import { Dimensions, Modal, StyleSheet, Text, View } from 'react-native';
@@ -6,6 +7,7 @@ import Animated, {
   FadeIn,
   FadeInDown,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withDelay,
   withRepeat,
@@ -31,7 +33,7 @@ interface PRCelebrationProps {
   onDismiss: () => void;
 }
 
-const CONFETTI_COLORS = ['#FFD60A', '#FF453A', '#30D158', '#0A84FF', '#BF5AF2', '#FF9F0A'];
+const CONFETTI_COLORS = ['#FF6A2B', '#9BE564', '#F2B705', '#FF8A5B', '#C2410C', '#E8F7CF'];
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 /** Deterministic pseudo-random in [0, 1) so render stays pure. */
@@ -92,6 +94,7 @@ function ConfettiPiece({ index }: { index: number }) {
 
 export function PRCelebration({ visible, prs, onDismiss }: PRCelebrationProps) {
   const { colors } = useTheme();
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     if (visible) {
@@ -101,21 +104,25 @@ export function PRCelebration({ visible, prs, onDismiss }: PRCelebrationProps) {
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onDismiss}>
-      <View style={styles.backdrop}>
+      <View style={[styles.backdrop, { backgroundColor: colors.overlay }]}>
         {visible &&
+          !reduceMotion &&
           Array.from({ length: 14 }).map((_, i) => <ConfettiPiece key={`${i}`} index={i} />)}
         <Animated.View
           entering={ZoomIn.springify().damping(12)}
-          style={[styles.card, { backgroundColor: colors.cardElevated }]}
+          style={[styles.card, { backgroundColor: colors.cardElevated, borderColor: colors.border }]}
         >
-          <Animated.Text entering={ZoomIn.delay(150).springify().damping(8)} style={styles.trophy}>
-            🏆
-          </Animated.Text>
+          <Animated.View
+            entering={ZoomIn.delay(150).springify().damping(8)}
+            style={[styles.trophy, { backgroundColor: colors.successSoft }]}
+          >
+            <Ionicons name="trophy" size={40} color={colors.success} />
+          </Animated.View>
           <Animated.Text
             entering={FadeInDown.delay(250)}
             style={[typography.title, { color: colors.text, textAlign: 'center' }]}
           >
-            New Personal Record!
+            New Personal Record
           </Animated.Text>
           <View style={styles.prList}>
             {prs.map((pr, i) => (
@@ -124,8 +131,10 @@ export function PRCelebration({ visible, prs, onDismiss }: PRCelebrationProps) {
                 entering={FadeIn.delay(350 + i * 120)}
                 style={styles.prRow}
               >
-                <Text style={[typography.headline, { color: colors.text }]}>{pr.exerciseName}</Text>
-                <Text style={[typography.headline, { color: colors.success, fontWeight: '800' }]}>
+                <Text style={[typography.headline, { color: colors.text, flex: 1 }]} numberOfLines={1}>
+                  {pr.exerciseName}
+                </Text>
+                <Text style={[typography.statValue, { color: colors.success }]}>
                   {formatWeight(pr.weightKg)}
                 </Text>
               </Animated.View>
@@ -150,10 +159,18 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 380,
     borderRadius: 24,
+    borderWidth: StyleSheet.hairlineWidth,
     padding: spacing.xxl,
     alignItems: 'center',
   },
-  trophy: { fontSize: 64, marginBottom: spacing.md },
+  trophy: {
+    width: 80,
+    height: 80,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.md,
+  },
   prList: { width: '100%', marginTop: spacing.lg, gap: spacing.sm },
   prRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   button: { marginTop: spacing.xl, alignSelf: 'stretch' },

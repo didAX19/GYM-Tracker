@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { shadow } from '@/theme/shadow';
 import { radius, spacing } from '@/theme/spacing';
+import { fontFamily } from '@/theme/typography';
 import { useTheme } from '@/theme/useTheme';
 
 interface SegmentedControlProps<T extends string> {
@@ -25,13 +26,20 @@ export function SegmentedControl<T extends string>({
           <Pressable
             key={opt.value}
             onPress={() => onChange(opt.value)}
-            style={[styles.segment, selected && { backgroundColor: colors.card, ...styles.selectedShadow }]}
+            accessibilityRole="button"
+            accessibilityState={{ selected }}
+            style={[
+              styles.segment,
+              selected && { backgroundColor: colors.card, ...styles.selectedShadow },
+            ]}
           >
             <Text
               style={[
                 styles.label,
-                { color: selected ? colors.text : colors.textSecondary },
-                selected && { fontWeight: '700' },
+                {
+                  color: selected ? colors.text : colors.textSecondary,
+                  fontFamily: selected ? fontFamily.semibold : fontFamily.medium,
+                },
               ]}
             >
               {opt.label}
@@ -47,14 +55,16 @@ const styles = StyleSheet.create({
   track: {
     flexDirection: 'row',
     borderRadius: radius.md,
-    padding: 3,
+    padding: 4,
   },
   segment: {
     flex: 1,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.md - 3,
+    paddingVertical: spacing.sm + 1,
+    borderRadius: radius.md - 4,
     alignItems: 'center',
+    minHeight: 36,
+    justifyContent: 'center',
   },
   selectedShadow: shadow(0.08, 4, 1),
-  label: { fontSize: 13, fontWeight: '500' },
+  label: { fontSize: 13 },
 });

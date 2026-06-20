@@ -14,10 +14,11 @@ import {
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { EmptyState } from '@/components/EmptyState';
+import { ExerciseIcon } from '@/components/ExerciseIcon';
 import { useExerciseStore } from '@/store/useExerciseStore';
 import { useProgramStore } from '@/store/useProgramStore';
 import { radius, spacing } from '@/theme/spacing';
-import { typography } from '@/theme/typography';
+import { fontFamily, typography } from '@/theme/typography';
 import { useTheme } from '@/theme/useTheme';
 import { confirm } from '@/utils/confirm';
 
@@ -39,6 +40,8 @@ function Stepper({
         hitSlop={6}
         onPress={() => onChange(Math.max(min, value - 1))}
         style={stepperStyles.button}
+        accessibilityRole="button"
+        accessibilityLabel="Decrease"
       >
         <Ionicons name="remove" size={18} color={colors.accent} />
       </Pressable>
@@ -49,6 +52,8 @@ function Stepper({
         hitSlop={6}
         onPress={() => onChange(Math.min(max, value + 1))}
         style={stepperStyles.button}
+        accessibilityRole="button"
+        accessibilityLabel="Increase"
       >
         <Ionicons name="add" size={18} color={colors.accent} />
       </Pressable>
@@ -63,7 +68,7 @@ const stepperStyles = StyleSheet.create({
     borderRadius: radius.sm,
     paddingHorizontal: 4,
   },
-  button: { padding: 6 },
+  button: { padding: 10 },
 });
 
 export default function EditDayScreen() {
@@ -82,7 +87,7 @@ export default function EditDayScreen() {
   if (!day) {
     return (
       <View style={[styles.safe, { backgroundColor: colors.background }]}>
-        <EmptyState icon="❓" title="Day not found" message="This workout day no longer exists." />
+        <EmptyState icon="help-circle-outline" title="Day not found" message="This workout day no longer exists." />
       </View>
     );
   }
@@ -103,7 +108,7 @@ export default function EditDayScreen() {
       <Stack.Screen options={{ title: day.name }} />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Card style={styles.section}>
-          <Text style={[typography.caption, { color: colors.textSecondary }]}>DAY NAME</Text>
+          <Text style={[typography.overline, { color: colors.textTertiary }]}>DAY NAME</Text>
           <TextInput
             value={day.name}
             onChangeText={(t) => renameDay(day.id, t)}
@@ -136,12 +141,14 @@ export default function EditDayScreen() {
         {!day.isRestDay && (
           <>
             <View style={styles.exercisesHeader}>
-              <Text style={[typography.headline, { color: colors.textSecondary }]}>EXERCISES</Text>
+              <Text style={[typography.overline, { color: colors.textTertiary }]}>EXERCISES</Text>
               <Pressable
                 onPress={() =>
                   router.push({ pathname: '/pick-exercise', params: { dayId: day.id } })
                 }
-                hitSlop={8}
+                hitSlop={10}
+                accessibilityRole="button"
+                accessibilityLabel="Add exercise"
               >
                 <Ionicons name="add-circle" size={28} color={colors.accent} />
               </Pressable>
@@ -150,7 +157,7 @@ export default function EditDayScreen() {
             {day.exercises.length === 0 ? (
               <Card>
                 <EmptyState
-                  icon="💪"
+                  icon="barbell"
                   title="No exercises yet"
                   message="Add exercises from the database or create your own."
                 />
@@ -167,7 +174,7 @@ export default function EditDayScreen() {
                 return (
                   <Card key={we.id} style={styles.exerciseCard}>
                     <View style={styles.exerciseTop}>
-                      <Text style={{ fontSize: 22 }}>{exercise?.icon ?? '🏋️'}</Text>
+                      <ExerciseIcon category={exercise?.category ?? 'Chest'} />
                       <View style={styles.exerciseName}>
                         <Text style={[typography.headline, { color: colors.text }]}>
                           {exercise?.name ?? 'Unknown exercise'}
@@ -178,9 +185,11 @@ export default function EditDayScreen() {
                       </View>
                       <View style={styles.exerciseActions}>
                         <Pressable
-                          hitSlop={6}
+                          hitSlop={10}
                           disabled={idx === 0}
                           onPress={() => moveExercise(day.id, we.id, -1)}
+                          accessibilityRole="button"
+                          accessibilityLabel="Move up"
                         >
                           <Ionicons
                             name="chevron-up"
@@ -189,9 +198,11 @@ export default function EditDayScreen() {
                           />
                         </Pressable>
                         <Pressable
-                          hitSlop={6}
+                          hitSlop={10}
                           disabled={idx === day.exercises.length - 1}
                           onPress={() => moveExercise(day.id, we.id, 1)}
+                          accessibilityRole="button"
+                          accessibilityLabel="Move down"
                         >
                           <Ionicons
                             name="chevron-down"
@@ -204,8 +215,10 @@ export default function EditDayScreen() {
                           />
                         </Pressable>
                         <Pressable
-                          hitSlop={6}
+                          hitSlop={10}
                           onPress={() => removeExerciseFromDay(day.id, we.id)}
+                          accessibilityRole="button"
+                          accessibilityLabel="Remove exercise"
                         >
                           <Ionicons name="trash-outline" size={20} color={colors.danger} />
                         </Pressable>
@@ -213,7 +226,7 @@ export default function EditDayScreen() {
                     </View>
                     <View style={styles.steppersRow}>
                       <View style={styles.stepperGroup}>
-                        <Text style={[typography.caption, { color: colors.textSecondary }]}>
+                        <Text style={[typography.overline, { color: colors.textTertiary }]}>
                           SETS
                         </Text>
                         <Stepper
@@ -224,7 +237,7 @@ export default function EditDayScreen() {
                         />
                       </View>
                       <View style={styles.stepperGroup}>
-                        <Text style={[typography.caption, { color: colors.textSecondary }]}>
+                        <Text style={[typography.overline, { color: colors.textTertiary }]}>
                           REPS
                         </Text>
                         <Stepper
@@ -272,7 +285,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
     fontSize: 17,
-    fontWeight: '600',
+    fontFamily: fontFamily.semibold,
   },
   restRow: {
     flexDirection: 'row',

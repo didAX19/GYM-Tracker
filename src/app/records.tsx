@@ -3,6 +3,7 @@ import { FlatList, StyleSheet, Text, View } from 'react-native';
 
 import { Card } from '@/components/Card';
 import { EmptyState } from '@/components/EmptyState';
+import { ExerciseIcon } from '@/components/ExerciseIcon';
 import { SegmentedControl } from '@/components/SegmentedControl';
 import { useExerciseStore } from '@/store/useExerciseStore';
 import { useRecordsStore } from '@/store/useRecordsStore';
@@ -42,8 +43,8 @@ export default function RecordsScreen() {
       <View style={styles.header}>
         <SegmentedControl<SortMode>
           options={[
-            { value: 'recent', label: 'Most Recent' },
-            { value: 'weight', label: 'Highest' },
+            { value: 'recent', label: 'Recent' },
+            { value: 'weight', label: 'Heaviest' },
             { value: 'name', label: 'Name' },
           ]}
           value={sort}
@@ -53,7 +54,7 @@ export default function RecordsScreen() {
 
       {rows.length === 0 ? (
         <EmptyState
-          icon="🏆"
+          icon="trophy-outline"
           title="No records yet"
           message="Finish a workout with logged weights and your personal records will appear here."
         />
@@ -62,15 +63,16 @@ export default function RecordsScreen() {
           data={rows}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
             <Card style={styles.row}>
-              <Text style={{ fontSize: 24 }}>{item.exercise?.icon ?? '🏋️'}</Text>
+              <ExerciseIcon category={item.exercise?.category ?? 'Chest'} />
               <View style={styles.rowText}>
-                <Text style={[typography.headline, { color: colors.text }]}>
+                <Text style={[typography.headline, { color: colors.text }]} numberOfLines={1}>
                   {item.exercise?.name ?? 'Unknown exercise'}
                 </Text>
                 <Text style={[typography.caption, { color: colors.textSecondary }]}>
-                  Achieved {formatFriendly(item.dateAchieved)}
+                  {formatFriendly(item.dateAchieved)}
                 </Text>
               </View>
               <Text style={[typography.statValue, { color: colors.accent }]}>
@@ -89,5 +91,5 @@ const styles = StyleSheet.create({
   header: { padding: spacing.lg, paddingBottom: spacing.sm },
   list: { padding: spacing.lg, paddingTop: spacing.sm, gap: spacing.md },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  rowText: { flex: 1 },
+  rowText: { flex: 1, gap: 2 },
 });

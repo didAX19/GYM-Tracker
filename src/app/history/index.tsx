@@ -7,8 +7,8 @@ import { Card } from '@/components/Card';
 import { EmptyState } from '@/components/EmptyState';
 import { useHistoryStore } from '@/store/useHistoryStore';
 import { useProgramStore } from '@/store/useProgramStore';
-import { spacing } from '@/theme/spacing';
-import { typography } from '@/theme/typography';
+import { radius, spacing } from '@/theme/spacing';
+import { fontFamily, typography } from '@/theme/typography';
 import { useTheme } from '@/theme/useTheme';
 import { formatWeight } from '@/utils/calc';
 import { confirm } from '@/utils/confirm';
@@ -33,7 +33,7 @@ export default function WorkoutHistoryScreen() {
     <View style={[styles.safe, { backgroundColor: colors.background }]}>
       {history.length === 0 ? (
         <EmptyState
-          icon="📋"
+          icon="time-outline"
           title="No workouts yet"
           message="Completed workouts will appear here with all your logged weights."
         />
@@ -42,6 +42,7 @@ export default function WorkoutHistoryScreen() {
           data={history}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
           renderItem={({ item }) => {
             const day = days.find((d) => d.id === item.workoutDayId);
             const name = day?.name ?? 'Workout';
@@ -61,35 +62,39 @@ export default function WorkoutHistoryScreen() {
               <Card style={styles.row}>
                 <Pressable
                   style={styles.rowMain}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${name}, ${formatFriendly(item.date)}`}
                   onPress={() =>
                     router.push({ pathname: '/history/[entryId]', params: { entryId: item.id } })
                   }
                 >
-                  <Text style={{ fontSize: 24 }}>💪</Text>
+                  <View style={[styles.badge, { backgroundColor: colors.accentSoft }]}>
+                    <Ionicons name="barbell" size={20} color={colors.accent} />
+                  </View>
                   <View style={styles.rowText}>
                     <View style={styles.titleRow}>
                       <Text style={[typography.headline, { color: colors.text }]}>{name}</Text>
                       {isToday && (
-                        <View style={[styles.todayBadge, { backgroundColor: colors.accentSoft }]}>
-                          <Text style={[typography.caption, { color: colors.accent, fontWeight: '700' }]}>
-                            Today
-                          </Text>
+                        <View style={[styles.todayBadge, { backgroundColor: colors.accent }]}>
+                          <Text style={[styles.todayText, { color: colors.onAccent }]}>TODAY</Text>
                         </View>
                       )}
                     </View>
                     <Text style={[typography.caption, { color: colors.textSecondary }]}>
                       {formatFriendly(item.date)} · {item.entries.length} exercise
                       {item.entries.length === 1 ? '' : 's'} · {loggedSets} set
-                      {loggedSets === 1 ? '' : 's'} logged
+                      {loggedSets === 1 ? '' : 's'}
                       {topWeight > 0 ? ` · top ${formatWeight(topWeight)}` : ''}
                     </Text>
                   </View>
                   <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
                 </Pressable>
                 <Pressable
-                  hitSlop={8}
+                  hitSlop={10}
                   onPress={() => void confirmDelete(item.id, name)}
                   style={styles.deleteBtn}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Delete ${name}`}
                 >
                   <Ionicons name="trash-outline" size={20} color={colors.danger} />
                 </Pressable>
@@ -107,12 +112,20 @@ const styles = StyleSheet.create({
   list: { padding: spacing.lg, gap: spacing.md },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   rowMain: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  rowText: { flex: 1 },
+  badge: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rowText: { flex: 1, gap: 2 },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   todayBadge: {
     paddingHorizontal: spacing.sm,
     paddingVertical: 2,
-    borderRadius: 999,
+    borderRadius: radius.sm,
   },
-  deleteBtn: { padding: spacing.xs },
+  todayText: { fontFamily: fontFamily.bold, fontSize: 10, letterSpacing: 1 },
+  deleteBtn: { padding: spacing.sm },
 });

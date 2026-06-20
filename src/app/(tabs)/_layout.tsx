@@ -4,6 +4,7 @@ import React from 'react';
 import { Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { fontFamily } from '@/theme/typography';
 import { useTheme } from '@/theme/useTheme';
 
 const TAB_BAR_HEIGHT = 49;
@@ -32,6 +33,11 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.textTertiary,
+        tabBarLabelStyle: {
+          fontFamily: fontFamily.semibold,
+          fontSize: 11,
+          letterSpacing: 0.2,
+        },
         tabBarStyle: {
           backgroundColor: colors.tabBar,
           borderTopColor: colors.border,

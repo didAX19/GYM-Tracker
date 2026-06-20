@@ -1,9 +1,10 @@
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { WeekdayKey, WeeklySchedule, WorkoutDay, WorkoutHistoryEntry } from '@/data/types';
 import { radius, spacing } from '@/theme/spacing';
-import { typography } from '@/theme/typography';
+import { fontFamily, typography } from '@/theme/typography';
 import { useTheme } from '@/theme/useTheme';
 import {
   dateOfWeekdayThisWeek,
@@ -30,59 +31,64 @@ export function WeeklyScheduleCard({ schedule, days, history, onPressDay }: Week
   );
 
   return (
-    <View>
+    <View style={styles.list}>
       {WEEKDAY_KEYS.map((key) => {
         const dayId = schedule[key];
         const day = dayId ? days.find((d) => d.id === dayId) : undefined;
         const isRest = !day || day.isRestDay;
         const isToday = key === today;
         const dateISO = toISODate(dateOfWeekdayThisWeek(key));
-        const completed = completedDates.has(dateISO);
+        const completed = completedDates.has(dateISO) && !isRest;
 
         const row = (
           <View
-            key={key}
             style={[
               styles.row,
-              { borderColor: colors.border },
-              isToday && { backgroundColor: colors.accentSoft, borderColor: colors.accent, borderWidth: 1 },
+              {
+                backgroundColor: isToday ? colors.accentSoft : 'transparent',
+                borderColor: isToday ? colors.accent : 'transparent',
+              },
             ]}
           >
             <Text
               style={[
-                typography.subhead,
+                typography.overline,
                 styles.weekday,
-                { color: isToday ? colors.accent : colors.textSecondary },
-                isToday && { fontWeight: '800' },
+                { color: isToday ? colors.accent : colors.textTertiary },
               ]}
             >
-              {WEEKDAY_LABELS[key]}
+              {WEEKDAY_LABELS[key].slice(0, 3)}
             </Text>
-            <View style={styles.dayInfo}>
-              {completed && !isRest ? (
-                <Text style={[typography.subhead, { color: colors.success, marginRight: spacing.xs }]}>
-                  ✓
-                </Text>
-              ) : null}
-              <Text
-                style={[
-                  typography.subhead,
-                  {
-                    color: isRest ? colors.textTertiary : colors.text,
-                    fontWeight: isRest ? '400' : '600',
-                  },
-                ]}
-                numberOfLines={1}
-              >
-                {isRest ? 'Rest Day' : day!.name}
-              </Text>
-            </View>
+
+            <Text
+              style={[
+                isRest ? styles.restName : styles.dayName,
+                {
+                  color: isRest ? colors.textTertiary : colors.text,
+                  fontFamily: isRest ? fontFamily.medium : fontFamily.semibold,
+                },
+              ]}
+              numberOfLines={1}
+            >
+              {isRest ? 'Rest' : day!.name}
+            </Text>
+
+            {completed ? (
+              <Ionicons name="checkmark-circle" size={18} color={colors.success} />
+            ) : (
+              <View style={[styles.dot, { backgroundColor: isRest ? colors.border : colors.borderStrong }]} />
+            )}
           </View>
         );
 
-        if (!onPressDay) return row;
+        if (!onPressDay) return <View key={key}>{row}</View>;
         return (
-          <Pressable key={key} onPress={() => onPressDay(key)}>
+          <Pressable
+            key={key}
+            onPress={() => onPressDay(key)}
+            accessibilityRole="button"
+            accessibilityLabel={`${WEEKDAY_LABELS[key]}: ${isRest ? 'Rest day' : day!.name}`}
+          >
             {row}
           </Pressable>
         );
@@ -92,16 +98,19 @@ export function WeeklyScheduleCard({ schedule, days, history, onPressDay }: Week
 }
 
 const styles = StyleSheet.create({
+  list: { gap: 2 },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: spacing.md,
+    gap: spacing.md,
+    paddingVertical: spacing.sm + 2,
     paddingHorizontal: spacing.md,
-    borderRadius: radius.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    marginBottom: 2,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    minHeight: 44,
   },
-  weekday: { width: 100 },
-  dayInfo: { flexDirection: 'row', alignItems: 'center', flex: 1, justifyContent: 'flex-end' },
+  weekday: { width: 38 },
+  dayName: { flex: 1, fontSize: 15, letterSpacing: -0.1 },
+  restName: { flex: 1, fontSize: 15 },
+  dot: { width: 7, height: 7, borderRadius: 999 },
 });

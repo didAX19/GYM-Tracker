@@ -21,9 +21,10 @@ import { StatTile } from '@/components/StatTile';
 import { WeightChart } from '@/components/WeightChart';
 import { useBodyWeightStore } from '@/store/useBodyWeightStore';
 import { radius, spacing } from '@/theme/spacing';
-import { typography } from '@/theme/typography';
+import { fontFamily, typography } from '@/theme/typography';
 import { useTheme } from '@/theme/useTheme';
 import { formatWeight, sortByDateDesc } from '@/utils/calc';
+import { confirm } from '@/utils/confirm';
 import { formatFriendly, isWithinLastDays, todayISO, toISODate } from '@/utils/date';
 
 type Range = 'week' | 'month' | 'year';
@@ -71,6 +72,15 @@ export default function BodyWeightScreen() {
     setDateInput(todayISO());
   };
 
+  const confirmRemove = async (id: string, date: string) => {
+    const ok = await confirm(
+      'Delete Weigh-In',
+      `Remove your weigh-in from ${formatFriendly(date)}? This cannot be undone.`,
+      { confirmLabel: 'Delete' }
+    );
+    if (ok) removeEntry(id);
+  };
+
   const shiftDate = (delta: number) => {
     const next = addDays(parseISO(dateInput), delta);
     if (next > new Date()) return;
@@ -82,16 +92,26 @@ export default function BodyWeightScreen() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.titleRow}>
           <Text style={[typography.largeTitle, { color: colors.text }]}>Body Weight</Text>
-          <Pressable onPress={() => setAdding(true)} hitSlop={8}>
+          <Pressable
+            onPress={() => setAdding(true)}
+            hitSlop={10}
+            accessibilityRole="button"
+            accessibilityLabel="Log body weight"
+          >
             <Ionicons name="add-circle" size={32} color={colors.accent} />
           </Pressable>
         </View>
 
-        <Card style={styles.currentCard}>
-          <Text style={[typography.caption, { color: colors.textSecondary }]}>CURRENT WEIGHT</Text>
-          <Text style={[styles.currentValue, { color: colors.text }]}>
-            {current ? formatWeight(current.weightKg) : '—'}
-          </Text>
+        <Card rail style={styles.currentCard}>
+          <Text style={[typography.overline, { color: colors.accent }]}>CURRENT WEIGHT</Text>
+          <View style={styles.currentValueRow}>
+            <Text style={[typography.hero, { color: colors.text }]}>
+              {current ? formatWeight(current.weightKg).replace(' kg', '') : '—'}
+            </Text>
+            {current ? (
+              <Text style={[typography.title, { color: colors.textSecondary }]}>KG</Text>
+            ) : null}
+          </View>
           {current && (
             <Text style={[typography.caption, { color: colors.textTertiary }]}>
               Logged {formatFriendly(current.date)}
@@ -121,48 +141,62 @@ export default function BodyWeightScreen() {
           </View>
         )}
 
-        <Text style={[typography.headline, styles.sectionTitle, { color: colors.textSecondary }]}>
+        <Text style={[typography.overline, styles.sectionTitle, { color: colors.textTertiary }]}>
           HISTORY
         </Text>
         {sorted.length === 0 ? (
           <Card>
             <EmptyState
-              icon="⚖️"
+              icon="scale-outline"
               title="No weigh-ins yet"
               message="Log your first body weight entry to start tracking your progress."
             />
-            <Button label="Add Weight" onPress={() => setAdding(true)} />
+            <Button label="Add Weight" icon="add" onPress={() => setAdding(true)} />
           </Card>
         ) : (
           <Card style={styles.historyCard}>
             {sorted.slice(0, 30).map((e, i) => {
               const prev = sorted[i + 1];
               const delta = prev ? e.weightKg - prev.weightKg : null;
+              const last = i === Math.min(sorted.length, 30) - 1;
               return (
                 <View
                   key={e.id}
-                  style={[styles.historyRow, { borderBottomColor: colors.border }]}
+                  style={[
+                    styles.historyRow,
+                    { borderBottomColor: colors.border, borderBottomWidth: last ? 0 : StyleSheet.hairlineWidth },
+                  ]}
                 >
                   <Text style={[typography.subhead, { color: colors.textSecondary, flex: 1 }]}>
                     {formatFriendly(e.date)}
                   </Text>
                   {delta != null && delta !== 0 && (
-                    <Text
-                      style={[
-                        typography.caption,
-                        {
-                          color: delta > 0 ? colors.warning : colors.success,
-                          marginRight: spacing.md,
-                        },
-                      ]}
-                    >
-                      {delta > 0 ? '▲' : '▼'} {Math.abs(Math.round(delta * 10) / 10)}
-                    </Text>
+                    <View style={styles.delta}>
+                      <Ionicons
+                        name={delta > 0 ? 'arrow-up' : 'arrow-down'}
+                        size={13}
+                        color={delta > 0 ? colors.warning : colors.success}
+                      />
+                      <Text
+                        style={[
+                          typography.caption,
+                          { color: delta > 0 ? colors.warning : colors.success },
+                        ]}
+                      >
+                        {Math.abs(Math.round(delta * 10) / 10)}
+                      </Text>
+                    </View>
                   )}
-                  <Text style={[typography.headline, { color: colors.text }]}>
+                  <Text style={[typography.headline, styles.tabular, { color: colors.text }]}>
                     {formatWeight(e.weightKg)}
                   </Text>
-                  <Pressable hitSlop={8} onPress={() => removeEntry(e.id)} style={styles.deleteBtn}>
+                  <Pressable
+                    hitSlop={10}
+                    onPress={() => void confirmRemove(e.id, e.date)}
+                    style={styles.deleteBtn}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Delete weigh-in from ${formatFriendly(e.date)}`}
+                  >
                     <Ionicons name="trash-outline" size={16} color={colors.textTertiary} />
                   </Pressable>
                 </View>
@@ -178,8 +212,8 @@ export default function BodyWeightScreen() {
         animationType="fade"
         onRequestClose={() => setAdding(false)}
       >
-        <View style={styles.promptBackdrop}>
-          <View style={[styles.promptCard, { backgroundColor: colors.cardElevated }]}>
+        <View style={[styles.promptBackdrop, { backgroundColor: colors.overlay }]}>
+          <View style={[styles.promptCard, { backgroundColor: colors.cardElevated, borderColor: colors.border }]}>
             <Text style={[typography.title, { color: colors.text }]}>Log Body Weight</Text>
 
             <View
@@ -201,27 +235,29 @@ export default function BodyWeightScreen() {
                 style={[styles.weightInput, { color: colors.text }]}
               />
               <Text style={[typography.title, styles.weightUnit, { color: colors.textSecondary }]}>
-                kg
+                KG
               </Text>
             </View>
 
             <View style={styles.dateRow}>
-              <Pressable onPress={() => shiftDate(-1)} hitSlop={8}>
-                <Ionicons name="chevron-back-circle" size={28} color={colors.accent} />
+              <Pressable onPress={() => shiftDate(-1)} hitSlop={8} accessibilityRole="button" accessibilityLabel="Previous day">
+                <Ionicons name="chevron-back-circle" size={30} color={colors.accent} />
               </Pressable>
               <Pressable
                 style={[styles.datePickerBtn, { backgroundColor: colors.inputBackground }]}
                 onPress={() => setCalendarOpen(true)}
+                accessibilityRole="button"
+                accessibilityLabel="Pick date"
               >
                 <Ionicons name="calendar-outline" size={18} color={colors.accent} />
-                <Text style={[typography.headline, { color: colors.text }]}>
+                <Text style={[typography.subheadStrong, { color: colors.text }]}>
                   {dateInput === todayISO() ? 'Today' : formatFriendly(dateInput)}
                 </Text>
               </Pressable>
-              <Pressable onPress={() => shiftDate(1)} hitSlop={8}>
+              <Pressable onPress={() => shiftDate(1)} hitSlop={8} accessibilityRole="button" accessibilityLabel="Next day">
                 <Ionicons
                   name="chevron-forward-circle"
-                  size={28}
+                  size={30}
                   color={dateInput === todayISO() ? colors.border : colors.accent}
                 />
               </Pressable>
@@ -230,7 +266,7 @@ export default function BodyWeightScreen() {
             <View style={styles.promptButtons}>
               <Button
                 label="Cancel"
-                variant="secondary"
+                variant="ghost"
                 onPress={() => setAdding(false)}
                 style={styles.promptButton}
               />
@@ -261,20 +297,21 @@ const styles = StyleSheet.create({
   content: { padding: spacing.lg, paddingBottom: spacing.xxl, gap: spacing.md },
   titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   currentCard: { alignItems: 'center', gap: spacing.xs },
-  currentValue: { fontSize: 44, fontWeight: '800', letterSpacing: -1 },
+  currentValueRow: { flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm },
   statsRow: { flexDirection: 'row', gap: spacing.md },
-  sectionTitle: { marginTop: spacing.md, fontSize: 13, letterSpacing: 0.6 },
+  sectionTitle: { marginTop: spacing.md },
   historyCard: { paddingVertical: spacing.xs },
   historyRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: spacing.md,
     paddingVertical: spacing.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  deleteBtn: { marginLeft: spacing.md },
+  delta: { flexDirection: 'row', alignItems: 'center', gap: 2 },
+  tabular: { fontVariant: ['tabular-nums'] },
+  deleteBtn: { padding: spacing.xs },
   promptBackdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
     alignItems: 'center',
     justifyContent: 'center',
     padding: spacing.xl,
@@ -283,6 +320,7 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 360,
     borderRadius: radius.xl,
+    borderWidth: StyleSheet.hairlineWidth,
     padding: spacing.xl,
     gap: spacing.lg,
     overflow: 'hidden',
@@ -302,8 +340,8 @@ const styles = StyleSheet.create({
   weightInput: {
     flex: 1,
     minWidth: 0,
-    fontSize: 32,
-    fontWeight: '700',
+    fontSize: 34,
+    fontFamily: fontFamily.bold,
     textAlign: 'center',
     paddingVertical: spacing.sm,
     paddingHorizontal: 0,
@@ -321,8 +359,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.sm + 2,
     borderRadius: radius.pill,
+    minHeight: 40,
   },
   promptButtons: { flexDirection: 'row', gap: spacing.md },
   promptButton: { flex: 1 },

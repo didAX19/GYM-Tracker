@@ -28,9 +28,9 @@ export default function Root({ children }: { children: React.ReactNode }) {
         <meta name="apple-mobile-web-app-title" content="Gym Tracker" />
 
         {/* Status bar / browser chrome color, theme-aware */}
-        <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F2F4F8" />
-        <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0B0F16" />
-        <meta name="theme-color" content="#0B0F16" />
+        <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F4F2EE" />
+        <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0C0D10" />
+        <meta name="theme-color" content="#0C0D10" />
 
         <link rel="manifest" href="/manifest.webmanifest" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -52,18 +52,20 @@ html, body, #root {
 }
 html {
   /* iOS standalone paints the status-bar region from the html background. */
-  background-color: #F2F4F8;
+  background-color: #F4F2EE;
+  /* Match form controls, scrollbars and caret to the active system theme. */
+  color-scheme: light dark;
 }
 body {
   /* Prevent the whole page from rubber-band scrolling; inner ScrollViews scroll instead. */
   overscroll-behavior-y: none;
   -webkit-tap-highlight-color: transparent;
-  background-color: #F2F4F8;
+  background-color: #F4F2EE;
   min-height: 100%;
   min-height: 100dvh;
 }
 @media (prefers-color-scheme: dark) {
-  html, body { background-color: #0B0F16; }
+  html, body { background-color: #0C0D10; }
 }
 * {
   /* App-like: no long-press text selection or callouts, faster taps. */
@@ -102,7 +104,7 @@ const themeShellScript = `
 (function () {
   function apply() {
     var dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    var bg = dark ? '#0B0F16' : '#F2F4F8';
+    var bg = dark ? '#0C0D10' : '#F4F2EE';
     document.documentElement.style.backgroundColor = bg;
     document.body.style.backgroundColor = bg;
     var status = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');

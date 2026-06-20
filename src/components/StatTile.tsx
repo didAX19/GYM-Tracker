@@ -1,5 +1,6 @@
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
@@ -11,21 +12,28 @@ interface StatTileProps {
   value: string;
   sub?: string;
   subColor?: string;
+  icon?: React.ComponentProps<typeof Ionicons>['name'];
 }
 
-export function StatTile({ label, value, sub, subColor }: StatTileProps) {
+export function StatTile({ label, value, sub, subColor, icon }: StatTileProps) {
   const { colors } = useTheme();
   return (
     <Card style={styles.tile}>
-      <Text style={[typography.caption, { color: colors.textSecondary }]} numberOfLines={1}>
-        {label.toUpperCase()}
-      </Text>
-      <Text style={[typography.statValue, { color: colors.text, marginTop: spacing.xs }]}>
+      <View style={styles.labelRow}>
+        {icon ? <Ionicons name={icon} size={13} color={colors.textTertiary} /> : null}
+        <Text
+          style={[typography.overline, { color: colors.textTertiary }]}
+          numberOfLines={1}
+        >
+          {label.toUpperCase()}
+        </Text>
+      </View>
+      <Text style={[typography.statValue, { color: colors.text }]} numberOfLines={1}>
         {value}
       </Text>
       {sub ? (
         <Text
-          style={[typography.caption, { color: subColor ?? colors.textTertiary, marginTop: 2 }]}
+          style={[typography.caption, { color: subColor ?? colors.textSecondary }]}
           numberOfLines={1}
         >
           {sub}
@@ -36,5 +44,6 @@ export function StatTile({ label, value, sub, subColor }: StatTileProps) {
 }
 
 const styles = StyleSheet.create({
-  tile: { flex: 1, padding: spacing.lg },
+  tile: { flex: 1, gap: spacing.xs },
+  labelRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
 });

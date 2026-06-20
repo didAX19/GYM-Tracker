@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -5,12 +6,13 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { EmptyState } from '@/components/EmptyState';
+import { ExerciseIcon } from '@/components/ExerciseIcon';
 import { useExerciseStore } from '@/store/useExerciseStore';
 import { useHistoryStore } from '@/store/useHistoryStore';
 import { useProgramStore } from '@/store/useProgramStore';
 import { useRecordsStore } from '@/store/useRecordsStore';
 import { radius, spacing } from '@/theme/spacing';
-import { typography } from '@/theme/typography';
+import { fontFamily, typography } from '@/theme/typography';
 import { useTheme } from '@/theme/useTheme';
 import { formatWeight } from '@/utils/calc';
 import { confirm } from '@/utils/confirm';
@@ -30,7 +32,7 @@ export default function WorkoutHistoryDetailScreen() {
     return (
       <View style={[styles.safe, { backgroundColor: colors.background }]}>
         <EmptyState
-          icon="❓"
+          icon="help-circle-outline"
           title="Workout not found"
           message="This history entry no longer exists."
         />
@@ -108,15 +110,14 @@ export default function WorkoutHistoryDetailScreen() {
           return (
             <Card key={e.exerciseId} style={styles.exerciseCard}>
               <View style={styles.exerciseHeader}>
-                <Text style={{ fontSize: 22 }}>{exercise?.icon ?? '🏋️'}</Text>
+                <ExerciseIcon category={exercise?.category ?? 'Chest'} />
                 <Text style={[typography.headline, styles.exerciseName, { color: colors.text }]}>
                   {exercise?.name ?? 'Unknown exercise'}
                 </Text>
                 {wasPr && (
                   <View style={[styles.prBadge, { backgroundColor: colors.successSoft }]}>
-                    <Text style={[typography.caption, { color: colors.success, fontWeight: '700' }]}>
-                      🏆 PR
-                    </Text>
+                    <Ionicons name="trophy" size={12} color={colors.success} />
+                    <Text style={[styles.prText, { color: colors.success }]}>PR</Text>
                   </View>
                 )}
               </View>
@@ -137,11 +138,8 @@ export default function WorkoutHistoryDetailScreen() {
                     </Text>
                     <Text
                       style={[
-                        typography.subhead,
-                        {
-                          color: w != null && w > 0 ? colors.accent : colors.textTertiary,
-                          fontWeight: '700',
-                        },
+                        typography.subheadStrong,
+                        { color: w != null && w > 0 ? colors.accent : colors.textTertiary },
                       ]}
                     >
                       {w != null && w > 0 ? formatWeight(w) : '—'}
@@ -174,10 +172,14 @@ const styles = StyleSheet.create({
   exerciseHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   exerciseName: { flex: 1 },
   prBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     paddingHorizontal: spacing.sm,
     paddingVertical: 3,
-    borderRadius: radius.pill,
+    borderRadius: radius.sm,
   },
+  prText: { fontFamily: fontFamily.bold, fontSize: 11, letterSpacing: 1 },
   setsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   setPill: {
     alignItems: 'center',

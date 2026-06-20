@@ -1,12 +1,13 @@
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { spacing } from '@/theme/spacing';
+import { radius, spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 import { useTheme } from '@/theme/useTheme';
 
 interface EmptyStateProps {
-  icon: string;
+  icon: React.ComponentProps<typeof Ionicons>['name'];
   title: string;
   message: string;
 }
@@ -15,8 +16,10 @@ export function EmptyState({ icon, title, message }: EmptyStateProps) {
   const { colors } = useTheme();
   return (
     <View style={styles.container}>
-      <Text style={styles.icon}>{icon}</Text>
-      <Text style={[typography.headline, { color: colors.text, marginTop: spacing.md }]}>
+      <View style={[styles.iconBadge, { backgroundColor: colors.accentSoft }]}>
+        <Ionicons name={icon} size={30} color={colors.accent} />
+      </View>
+      <Text style={[typography.title, { color: colors.text, marginTop: spacing.md }]}>
         {title}
       </Text>
       <Text
@@ -33,5 +36,11 @@ export function EmptyState({ icon, title, message }: EmptyStateProps) {
 
 const styles = StyleSheet.create({
   container: { alignItems: 'center', paddingVertical: spacing.xxl, paddingHorizontal: spacing.xl },
-  icon: { fontSize: 44 },
+  iconBadge: {
+    width: 64,
+    height: 64,
+    borderRadius: radius.xl,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });

@@ -27,15 +27,15 @@
       "shortName": "Gym Tracker",
       "display": "standalone",
       "orientation": "portrait",
-      "themeColor": "#0B0F16",
-      "backgroundColor": "#0B0F16"
+      "themeColor": "#0C0D10",
+      "backgroundColor": "#0C0D10"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#0C0D10",
           "android": {
             "image": "./assets/images/splash-icon.png",
             "imageWidth": 76

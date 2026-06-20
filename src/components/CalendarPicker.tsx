@@ -20,7 +20,7 @@ import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { ISODate } from '@/data/types';
 import { radius, spacing } from '@/theme/spacing';
-import { typography } from '@/theme/typography';
+import { fontFamily, typography } from '@/theme/typography';
 import { useTheme } from '@/theme/useTheme';
 import { toISODate } from '@/utils/date';
 
@@ -81,16 +81,18 @@ export function CalendarPicker({
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable style={styles.backdrop} onPress={onClose}>
+      <Pressable style={[styles.backdrop, { backgroundColor: colors.overlay }]} onPress={onClose}>
         <Pressable
-          style={[styles.card, { backgroundColor: colors.cardElevated }]}
+          style={[styles.card, { backgroundColor: colors.cardElevated, borderColor: colors.border }]}
           onPress={(e) => e.stopPropagation()}
         >
           <View style={styles.header}>
             <Pressable
               onPress={() => canGoPrev && setViewMonth((m) => subMonths(m, 1))}
-              hitSlop={8}
+              hitSlop={10}
               disabled={!canGoPrev}
+              accessibilityRole="button"
+              accessibilityLabel="Previous month"
             >
               <Ionicons
                 name="chevron-back"
@@ -103,8 +105,10 @@ export function CalendarPicker({
             </Text>
             <Pressable
               onPress={() => canGoNext && setViewMonth((m) => addMonths(m, 1))}
-              hitSlop={8}
+              hitSlop={10}
               disabled={!canGoNext}
+              accessibilityRole="button"
+              accessibilityLabel="Next month"
             >
               <Ionicons
                 name="chevron-forward"
@@ -134,6 +138,9 @@ export function CalendarPicker({
                   style={styles.cell}
                   onPress={() => handleSelect(day)}
                   disabled={disabled}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: isSelected, disabled }}
+                  accessibilityLabel={format(day, 'EEEE, MMMM d, yyyy')}
                 >
                   <View
                     style={[
@@ -147,13 +154,14 @@ export function CalendarPicker({
                         typography.subhead,
                         {
                           color: isSelected
-                            ? '#FFFFFF'
+                            ? colors.onAccent
                             : disabled
                               ? colors.textTertiary
                               : inMonth
                                 ? colors.text
                                 : colors.textTertiary,
                           opacity: disabled ? 0.4 : 1,
+                          fontFamily: isSelected ? fontFamily.bold : fontFamily.medium,
                         },
                       ]}
                     >
@@ -167,6 +175,8 @@ export function CalendarPicker({
 
           <Pressable
             style={styles.todayBtn}
+            accessibilityRole="button"
+            accessibilityLabel="Jump to today"
             onPress={() => {
               const today = startOfDay(new Date());
               if (!isDisabled(today)) {
@@ -186,7 +196,6 @@ export function CalendarPicker({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.45)',
     alignItems: 'center',
     justifyContent: 'center',
     padding: spacing.xl,
@@ -195,6 +204,7 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 360,
     borderRadius: radius.xl,
+    borderWidth: StyleSheet.hairlineWidth,
     padding: spacing.lg,
     gap: spacing.md,
   },

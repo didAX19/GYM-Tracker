@@ -16,7 +16,7 @@ import { useHistoryStore } from '@/store/useHistoryStore';
 import { useProgramStore } from '@/store/useProgramStore';
 import { useRecordsStore } from '@/store/useRecordsStore';
 import { useSessionStore } from '@/store/useSessionStore';
-import { spacing } from '@/theme/spacing';
+import { radius, spacing } from '@/theme/spacing';
 import { typography } from '@/theme/typography';
 import { useTheme } from '@/theme/useTheme';
 import { estimateDurationMin, formatWeight, sortByDateDesc, weeklyWeightChange } from '@/utils/calc';
@@ -99,8 +99,8 @@ export default function DashboardScreen() {
   return (
     <SafeAreaView edges={['top']} style={[styles.safe, { backgroundColor: colors.background }]}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={[typography.subhead, { color: colors.textSecondary }]}>
-          {format(new Date(), 'EEEE, MMMM d')}
+        <Text style={[typography.overline, { color: colors.accent }]}>
+          {format(new Date(), 'EEEE, MMMM d').toUpperCase()}
         </Text>
         <Text style={[typography.largeTitle, { color: colors.text }]}>Dashboard</Text>
 
@@ -108,6 +108,8 @@ export default function DashboardScreen() {
         <Animated.View entering={FadeInDown.springify()}>
           {completedToday ? (
             <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`${completedTodayDay?.name ?? 'Workout'} complete, view details`}
               onPress={() =>
                 router.push({
                   pathname: '/history/[entryId]',
@@ -115,12 +117,15 @@ export default function DashboardScreen() {
                 })
               }
             >
-              <Card style={styles.completedCard}>
+              <Card rail style={styles.heroCard}>
                 <View style={styles.completedHeader}>
-                  <Text style={{ fontSize: 28 }}>✅</Text>
+                  <View style={[styles.iconBadge, { backgroundColor: colors.successSoft }]}>
+                    <Ionicons name="checkmark-done" size={22} color={colors.success} />
+                  </View>
                   <View style={styles.completedTitle}>
-                    <Text style={[typography.headline, { color: colors.text }]}>
-                      {completedTodayDay?.name ?? 'Workout'} Complete
+                    <Text style={[typography.overline, { color: colors.success }]}>COMPLETE</Text>
+                    <Text style={[typography.title, { color: colors.text }]}>
+                      {completedTodayDay?.name ?? 'Workout'}
                     </Text>
                     <Text style={[typography.caption, { color: colors.textSecondary }]}>
                       {completedToday.entries.length} exercise
@@ -134,7 +139,7 @@ export default function DashboardScreen() {
                   </View>
                   <Ionicons name="chevron-forward" size={20} color={colors.textTertiary} />
                 </View>
-                <View style={styles.completedPreview}>
+                <View style={[styles.completedPreview, { borderTopColor: colors.border }]}>
                   {completedToday.entries.slice(0, 3).map((e) => {
                     const max = Math.max(
                       0,
@@ -148,7 +153,7 @@ export default function DashboardScreen() {
                         >
                           {exercises.find((x) => x.id === e.exerciseId)?.name ?? 'Exercise'}
                         </Text>
-                        <Text style={[typography.subhead, { color: colors.text, fontWeight: '700' }]}>
+                        <Text style={[typography.subheadStrong, { color: colors.text }]}>
                           {max > 0 ? formatWeight(max) : '—'}
                         </Text>
                       </View>
@@ -163,62 +168,74 @@ export default function DashboardScreen() {
               </Card>
             </Pressable>
           ) : activeSession ? (
-            <Card style={styles.todayCard}>
-              <Text style={[typography.caption, { color: colors.warning, fontWeight: '700' }]}>
-                WORKOUT IN PROGRESS
-              </Text>
-              <Text style={[typography.title, { color: colors.text }]}>
-                {activeSessionDay?.name ?? 'Workout'}
-              </Text>
-              <Text style={[typography.subhead, { color: colors.textSecondary }]}>
-                Your entered weights are saved — pick up where you left off.
-              </Text>
+            <Card rail style={styles.heroCard}>
+              <View style={styles.heroTextBlock}>
+                <Text style={[typography.overline, { color: colors.warning }]}>
+                  WORKOUT IN PROGRESS
+                </Text>
+                <Text style={[typography.largeTitle, { color: colors.text }]}>
+                  {activeSessionDay?.name ?? 'Workout'}
+                </Text>
+                <Text style={[typography.subhead, { color: colors.textSecondary }]}>
+                  Your entered weights are saved — pick up where you left off.
+                </Text>
+              </View>
               <Button
                 label="Resume Workout"
+                icon="play"
+                size="lg"
                 onPress={() =>
                   router.push({
                     pathname: '/workout/[dayId]',
                     params: { dayId: activeSession.workoutDayId },
                   })
                 }
-                style={styles.startButton}
+                style={styles.heroButton}
               />
             </Card>
           ) : isRestToday ? (
-            <Card style={styles.todayCard}>
-              <Text style={styles.todayEmoji}>😴</Text>
-              <Text style={[typography.title, { color: colors.text }]}>Today is a Rest Day</Text>
-              <Text style={[typography.subhead, { color: colors.textSecondary, textAlign: 'center' }]}>
+            <Card style={styles.restCard}>
+              <View style={[styles.iconBadge, { backgroundColor: colors.accentSoft }]}>
+                <Ionicons name="moon" size={22} color={colors.accent} />
+              </View>
+              <Text style={[typography.title, { color: colors.text }]}>Rest Day</Text>
+              <Text
+                style={[typography.subhead, { color: colors.textSecondary, textAlign: 'center' }]}
+              >
                 Recovery is where the growth happens.
               </Text>
               <View style={styles.restStats}>
                 {lastWorkout && (
                   <Text style={[typography.caption, { color: colors.textTertiary }]}>
-                    Last workout: {lastWorkout.name} · {formatFriendly(lastWorkout.date)}
+                    Last: {lastWorkout.name} · {formatFriendly(lastWorkout.date)}
                   </Text>
                 )}
                 {nextWorkout && (
                   <Text style={[typography.caption, { color: colors.textTertiary }]}>
-                    Next up: {nextWorkout.name} on {nextWorkout.weekday}
+                    Next: {nextWorkout.name} on {nextWorkout.weekday}
                   </Text>
                 )}
               </View>
             </Card>
           ) : (
-            <Card style={styles.todayCard}>
-              <Text style={[typography.caption, { color: colors.accent, fontWeight: '700' }]}>
-                TODAY&apos;S WORKOUT
-              </Text>
-              <Text style={[typography.title, { color: colors.text }]}>{todayDay!.name}</Text>
-              <Text style={[typography.subhead, { color: colors.textSecondary }]}>
-                {todayDay!.exercises.length} exercises · ~{estimateDurationMin(todayDay!)} min
-              </Text>
+            <Card rail style={styles.heroCard}>
+              <View style={styles.heroTextBlock}>
+                <Text style={[typography.overline, { color: colors.accent }]}>
+                  TODAY&apos;S WORKOUT
+                </Text>
+                <Text style={[typography.largeTitle, { color: colors.text }]}>{todayDay!.name}</Text>
+                <Text style={[typography.subhead, { color: colors.textSecondary }]}>
+                  {todayDay!.exercises.length} exercises · ~{estimateDurationMin(todayDay!)} min
+                </Text>
+              </View>
               <Button
                 label="Start Workout"
+                icon="barbell"
+                size="lg"
                 onPress={() =>
                   router.push({ pathname: '/workout/[dayId]', params: { dayId: todayDay!.id } })
                 }
-                style={styles.startButton}
+                style={styles.heroButton}
               />
             </Card>
           )}
@@ -228,6 +245,7 @@ export default function DashboardScreen() {
         <Animated.View entering={FadeInDown.delay(80).springify()} style={styles.tilesRow}>
           <StatTile
             label="Body Weight"
+            icon="scale-outline"
             value={currentWeight ? formatWeight(currentWeight.weightKg) : '—'}
             sub={
               weekChange != null
@@ -246,21 +264,24 @@ export default function DashboardScreen() {
           />
           <StatTile
             label="This Week"
+            icon="flame-outline"
             value={`${workoutsThisWeek}`}
-            sub={`workout${workoutsThisWeek === 1 ? '' : 's'} completed`}
+            sub={`workout${workoutsThisWeek === 1 ? '' : 's'} done`}
           />
         </Animated.View>
         <Animated.View entering={FadeInDown.delay(160).springify()} style={styles.tilesRow}>
-          <StatTile label="Exercises" value={`${exercisesTracked}`} sub="in your program" />
-          <StatTile label="Records" value={`${records.length}`} sub="personal records" />
+          <StatTile label="Exercises" icon="list-outline" value={`${exercisesTracked}`} sub="in your program" />
+          <StatTile label="Records" icon="trophy-outline" value={`${records.length}`} sub="personal records" />
         </Animated.View>
 
         {/* Personal records link */}
         <Animated.View entering={FadeInDown.delay(240).springify()}>
           <Link href="/records" asChild>
-            <Pressable>
+            <Pressable accessibilityRole="button" accessibilityLabel="Personal records">
               <Card style={styles.linkCard}>
-                <Text style={{ fontSize: 22 }}>🏆</Text>
+                <View style={[styles.iconBadge, { backgroundColor: colors.accentSoft }]}>
+                  <Ionicons name="trophy" size={20} color={colors.accent} />
+                </View>
                 <View style={styles.linkText}>
                   <Text style={[typography.headline, { color: colors.text }]}>
                     Personal Records
@@ -280,9 +301,11 @@ export default function DashboardScreen() {
         {/* Workout history link */}
         <Animated.View entering={FadeInDown.delay(280).springify()}>
           <Link href="/history" asChild>
-            <Pressable>
+            <Pressable accessibilityRole="button" accessibilityLabel="Workout history">
               <Card style={styles.linkCard}>
-                <Text style={{ fontSize: 22 }}>📋</Text>
+                <View style={[styles.iconBadge, { backgroundColor: colors.accentSoft }]}>
+                  <Ionicons name="time" size={20} color={colors.accent} />
+                </View>
                 <View style={styles.linkText}>
                   <Text style={[typography.headline, { color: colors.text }]}>
                     Workout History
@@ -301,7 +324,7 @@ export default function DashboardScreen() {
 
         {/* Weekly overview */}
         <Animated.View entering={FadeInDown.delay(320).springify()}>
-          <Text style={[typography.headline, styles.sectionTitle, { color: colors.textSecondary }]}>
+          <Text style={[typography.overline, styles.sectionTitle, { color: colors.textTertiary }]}>
             THIS WEEK
           </Text>
           <Card>
@@ -316,17 +339,24 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   content: { padding: spacing.lg, paddingBottom: spacing.xxl, gap: spacing.md },
-  todayCard: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xl },
-  todayEmoji: { fontSize: 40 },
-  completedCard: { gap: spacing.md },
+  heroCard: { gap: spacing.lg },
+  heroTextBlock: { gap: spacing.xs },
+  heroButton: { alignSelf: 'stretch' },
+  restCard: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xl },
+  iconBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   completedHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  completedTitle: { flex: 1 },
-  completedPreview: { gap: spacing.xs },
+  completedTitle: { flex: 1, gap: 2 },
+  completedPreview: { gap: spacing.xs, borderTopWidth: StyleSheet.hairlineWidth, paddingTop: spacing.md },
   completedRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   restStats: { gap: spacing.xs, alignItems: 'center', marginTop: spacing.sm },
-  startButton: { alignSelf: 'stretch', marginTop: spacing.md },
   tilesRow: { flexDirection: 'row', gap: spacing.md },
   linkCard: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  linkText: { flex: 1 },
-  sectionTitle: { fontSize: 13, letterSpacing: 0.6, marginBottom: spacing.sm },
+  linkText: { flex: 1, gap: 2 },
+  sectionTitle: { marginBottom: spacing.sm, marginTop: spacing.sm },
 });
