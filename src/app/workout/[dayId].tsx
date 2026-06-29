@@ -19,7 +19,6 @@ import { Card } from '@/components/Card';
 import { EmptyState } from '@/components/EmptyState';
 import { ExerciseIcon } from '@/components/ExerciseIcon';
 import { PRCelebration, PRResult } from '@/components/PRCelebration';
-import { SetEntry } from '@/data/types';
 import { useExerciseStore } from '@/store/useExerciseStore';
 import { lastSessionMax, useHistoryStore } from '@/store/useHistoryStore';
 import { useProgramStore } from '@/store/useProgramStore';
@@ -31,6 +30,7 @@ import { useTheme } from '@/theme/useTheme';
 import { estimateDurationMin, formatWeight } from '@/utils/calc';
 import { confirm } from '@/utils/confirm';
 import { todayISO } from '@/utils/date';
+import { commitSession } from '@/utils/session';
 
 export default function WorkoutSessionScreen() {
   const { colors } = useTheme();
@@ -39,9 +39,7 @@ export default function WorkoutSessionScreen() {
   const day = useProgramStore((s) => s.days.find((d) => d.id === dayId));
   const exercises = useExerciseStore((s) => s.exercises);
   const records = useRecordsStore((s) => s.records);
-  const submitWeight = useRecordsStore((s) => s.submitWeight);
   const history = useHistoryStore((s) => s.history);
-  const logWorkout = useHistoryStore((s) => s.logWorkout);
 
   const session = useSessionStore((s) => s.session);
   const startSession = useSessionStore((s) => s.startSession);
@@ -84,31 +82,12 @@ export default function WorkoutSessionScreen() {
   const hasAnyInput = Object.values(weights).some((arr) => arr.some((v) => parseFloat(v) > 0));
 
   const finishWorkout = () => {
-    const date = todayISO();
-    const entries: SetEntry[] = [];
-    const newPrs: PRResult[] = [];
-
-    for (const we of day.exercises) {
-      const inputs = weights[we.id] ?? [];
-      const parsed = Array.from({ length: we.sets }, (_, i) => {
-        const v = parseFloat(inputs[i]);
-        return Number.isFinite(v) && v > 0 ? v : null;
-      });
-      entries.push({ exerciseId: we.exerciseId, weightsKg: parsed });
-
-      const maxEntered = Math.max(...parsed.map((v) => v ?? 0));
-      if (maxEntered > 0) {
-        const isPr = submitWeight(we.exerciseId, maxEntered, date);
-        if (isPr) {
-          const exercise = exercises.find((e) => e.id === we.exerciseId);
-          newPrs.push({ exerciseName: exercise?.name ?? 'Exercise', weightKg: maxEntered });
-        }
-      }
+    const current = useSessionStore.getState().session;
+    if (!current) {
+      router.back();
+      return;
     }
-
-    logWorkout(day.id, date, entries);
-    clearSession();
-
+    const newPrs = commitSession(current, day);
     if (newPrs.length > 0) {
       setPrs(newPrs);
       setCelebrating(true);

@@ -8,6 +8,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
+import { MembershipCard } from '@/components/MembershipCard';
 import { StatTile } from '@/components/StatTile';
 import { WeeklyScheduleCard } from '@/components/WeeklyScheduleCard';
 import { useBodyWeightStore } from '@/store/useBodyWeightStore';
@@ -28,6 +29,7 @@ import {
   WEEKDAY_KEYS,
   WEEKDAY_LABELS,
 } from '@/utils/date';
+import { commitSession, sessionHasInput } from '@/utils/session';
 
 export default function DashboardScreen() {
   const { colors } = useTheme();
@@ -47,10 +49,18 @@ export default function DashboardScreen() {
   const isRestToday = !todayDay || todayDay.isRestDay;
   const today = todayISO();
 
-  // Discard sessions left over from a previous day.
+  // A session left running on a previous day is auto-completed with whatever
+  // was entered, rather than discarded. With no usable input there is nothing
+  // worth logging, so it's simply cleared.
   useEffect(() => {
-    if (session && session.date !== today) clearSession();
-  }, [session, today, clearSession]);
+    if (!session || session.date === today) return;
+    const day = days.find((d) => d.id === session.workoutDayId);
+    if (day && !day.isRestDay && sessionHasInput(session)) {
+      commitSession(session, day);
+    } else {
+      clearSession();
+    }
+  }, [session, today, days, clearSession]);
 
   // One workout per day: block starting again once any workout is completed today.
   const completedToday = useMemo(
@@ -274,8 +284,13 @@ export default function DashboardScreen() {
           <StatTile label="Records" icon="trophy-outline" value={`${records.length}`} sub="personal records" />
         </Animated.View>
 
+        {/* Gym membership renewal reminder */}
+        <Animated.View entering={FadeInDown.delay(220).springify()}>
+          <MembershipCard />
+        </Animated.View>
+
         {/* Personal records link */}
-        <Animated.View entering={FadeInDown.delay(240).springify()}>
+        <Animated.View entering={FadeInDown.delay(280).springify()}>
           <Link href="/records" asChild>
             <Pressable accessibilityRole="button" accessibilityLabel="Personal records">
               <Card style={styles.linkCard}>
@@ -299,7 +314,7 @@ export default function DashboardScreen() {
         </Animated.View>
 
         {/* Workout history link */}
-        <Animated.View entering={FadeInDown.delay(280).springify()}>
+        <Animated.View entering={FadeInDown.delay(320).springify()}>
           <Link href="/history" asChild>
             <Pressable accessibilityRole="button" accessibilityLabel="Workout history">
               <Card style={styles.linkCard}>
@@ -323,7 +338,7 @@ export default function DashboardScreen() {
         </Animated.View>
 
         {/* Weekly overview */}
-        <Animated.View entering={FadeInDown.delay(320).springify()}>
+        <Animated.View entering={FadeInDown.delay(360).springify()}>
           <Text style={[typography.overline, styles.sectionTitle, { color: colors.textTertiary }]}>
             THIS WEEK
           </Text>

@@ -144,7 +144,7 @@ export default function EditDayScreen() {
               <Text style={[typography.overline, { color: colors.textTertiary }]}>EXERCISES</Text>
               <Pressable
                 onPress={() =>
-                  router.push({ pathname: '/pick-exercise', params: { dayId: day.id } })
+                  router.push({ pathname: '/program/pick-exercise', params: { dayId: day.id } })
                 }
                 hitSlop={10}
                 accessibilityRole="button"
@@ -164,7 +164,7 @@ export default function EditDayScreen() {
                 <Button
                   label="Add Exercise"
                   onPress={() =>
-                    router.push({ pathname: '/pick-exercise', params: { dayId: day.id } })
+                    router.push({ pathname: '/program/pick-exercise', params: { dayId: day.id } })
                   }
                 />
               </Card>

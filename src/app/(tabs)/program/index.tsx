@@ -42,7 +42,7 @@ export default function ProgramScreen() {
     const day = addDay(name);
     setNewDayVisible(false);
     setNewDayName('');
-    router.push({ pathname: '/edit-day', params: { dayId: day.id } });
+    router.push({ pathname: '/program/edit-day', params: { dayId: day.id } });
   };
 
   return (
@@ -92,7 +92,7 @@ export default function ProgramScreen() {
               key={day.id}
               accessibilityRole="button"
               accessibilityLabel={`Edit ${day.name}`}
-              onPress={() => router.push({ pathname: '/edit-day', params: { dayId: day.id } })}
+              onPress={() => router.push({ pathname: '/program/edit-day', params: { dayId: day.id } })}
             >
               <Card style={styles.dayCard}>
                 <View style={[styles.dayBadge, { backgroundColor: day.isRestDay ? colors.inputBackground : colors.accentSoft }]}>

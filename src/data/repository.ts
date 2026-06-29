@@ -14,6 +14,7 @@ export const storageKeys = {
   records: 'gym-tracker/records',
   history: 'gym-tracker/history',
   session: 'gym-tracker/active-session',
+  subscription: 'gym-tracker/subscription',
 } as const;
 
 export const createPersistStorage = <T>() => createJSONStorage<T>(() => AsyncStorage);
